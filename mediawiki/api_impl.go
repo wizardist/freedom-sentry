@@ -113,7 +113,7 @@ func payloadToUrlValues(payload map[string]interface{}) url.Values {
 		default:
 			rt := reflect.TypeOf(v)
 			if rt.Kind() == reflect.Slice {
-				data.Set(k, joinInterfaceSlice(v))
+				data.Set(k, joinInterfaceSlice(v, listSeparator))
 			} else {
 				data.Set(k, fmt.Sprint(v))
 			}
@@ -123,7 +123,7 @@ func payloadToUrlValues(payload map[string]interface{}) url.Values {
 	return data
 }
 
-func joinInterfaceSlice(slice interface{}) string {
+func joinInterfaceSlice(slice interface{}, separator string) string {
 	rv := reflect.ValueOf(slice)
 
 	rvLen := rv.Len()
@@ -147,7 +147,7 @@ func joinInterfaceSlice(slice interface{}) string {
 	builder.WriteString(values[0])
 
 	for _, v := range values[1:] {
-		builder.WriteString(listSeparator)
+		builder.WriteString(separator)
 		builder.WriteString(v)
 	}
 
