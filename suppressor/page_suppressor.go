@@ -1,7 +1,6 @@
 package suppressor
 
 import (
-	"freedom-sentry/revision"
 	"log"
 )
 
@@ -10,11 +9,11 @@ type PageSuppressor interface {
 }
 
 type pageSuppressorImpl struct {
-	revRepo       revision.Repository
+	revRepo       RevisionRepository
 	revSuppressor RevisionSuppressor
 }
 
-func NewPageSuppressor(revRepo revision.Repository, revSuppressor RevisionSuppressor) PageSuppressor {
+func NewPageSuppressor(revRepo RevisionRepository, revSuppressor RevisionSuppressor) PageSuppressor {
 	return &pageSuppressorImpl{
 		revRepo:       revRepo,
 		revSuppressor: revSuppressor,
@@ -23,7 +22,7 @@ func NewPageSuppressor(revRepo revision.Repository, revSuppressor RevisionSuppre
 
 func (ps pageSuppressorImpl) SuppressPageByName(name string) error {
 	log.Println("retrieving revisions for page:", name)
-	revs, err := ps.revRepo.GetRevisionsByPageName(name)
+	revs, err := ps.revRepo.GetAllByPageName(name)
 	if err != nil {
 		log.Println("failed to retrieve revisions for page:", err)
 		return err

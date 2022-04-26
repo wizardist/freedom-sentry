@@ -1,12 +1,12 @@
-package revision
+package suppressor
 
 import (
 	"freedom-sentry/mediawiki"
 	"freedom-sentry/mediawiki/action/query"
 )
 
-type Repository interface {
-	GetRevisionsByPageName(name string) ([]mediawiki.Revision, error)
+type RevisionRepository interface {
+	GetAllByPageName(name string) ([]mediawiki.Revision, error)
 	GetLatestPageContent(name string) (string, error)
 }
 
@@ -14,11 +14,11 @@ type RepositoryImpl struct {
 	api mediawiki.Api
 }
 
-func NewRepository(api mediawiki.Api) Repository {
+func NewRepository(api mediawiki.Api) RevisionRepository {
 	return &RepositoryImpl{api: api}
 }
 
-func (rr *RepositoryImpl) GetRevisionsByPageName(name string) ([]mediawiki.Revision, error) {
+func (rr *RepositoryImpl) GetAllByPageName(name string) ([]mediawiki.Revision, error) {
 	revProp := &query.RevisionsQueryProperty{
 		Properties: []string{"ids", "timestamp", "user"},
 		Limit:      5000,

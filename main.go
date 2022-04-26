@@ -4,7 +4,6 @@ import (
 	"freedom-sentry/config"
 	"freedom-sentry/mediawiki"
 	"freedom-sentry/mediawiki/action/query"
-	"freedom-sentry/revision"
 	"freedom-sentry/suppressor"
 	"log"
 	"net/http"
@@ -41,7 +40,7 @@ func main() {
 	client.Timeout = 15 * time.Second
 
 	api := mediawiki.NewApi(os.Getenv(config.EnvApiEndpoint), client, tokenFn)
-	repo := revision.NewRepository(api)
+	repo := suppressor.NewRepository(api)
 	suppressedPagesStr, err := repo.GetLatestPageContent(os.Getenv(config.EnvSuppressionListName))
 	if err != nil {
 		log.Fatalln(err)
