@@ -10,15 +10,15 @@ type RevisionRepository interface {
 	GetLatestPageContent(name string) (string, error)
 }
 
-type RepositoryImpl struct {
+func NewRepository(api mediawiki.Api) RevisionRepository {
+	return &revRepoImpl{api: api}
+}
+
+type revRepoImpl struct {
 	api mediawiki.Api
 }
 
-func NewRepository(api mediawiki.Api) RevisionRepository {
-	return &RepositoryImpl{api: api}
-}
-
-func (rr *RepositoryImpl) GetAllByPageName(name string) ([]mediawiki.Revision, error) {
+func (rr *revRepoImpl) GetAllByPageName(name string) ([]mediawiki.Revision, error) {
 	revProp := &query.RevisionsQueryProperty{
 		Properties: []string{"ids", "timestamp", "user"},
 		Limit:      5000,
@@ -35,7 +35,7 @@ func (rr *RepositoryImpl) GetAllByPageName(name string) ([]mediawiki.Revision, e
 	return revProp.GetRevisions(), err
 }
 
-func (rr *RepositoryImpl) GetLatestPageContent(name string) (string, error) {
+func (rr *revRepoImpl) GetLatestPageContent(name string) (string, error) {
 	revProp := &query.RevisionsQueryProperty{
 		Properties: []string{"ids", "content"},
 		Limit:      1,

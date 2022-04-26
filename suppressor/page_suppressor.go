@@ -8,16 +8,16 @@ type PageSuppressor interface {
 	SuppressPageByName(name string) error
 }
 
-type pageSuppressorImpl struct {
-	revRepo       RevisionRepository
-	revSuppressor RevisionSuppressor
-}
-
 func NewPageSuppressor(revRepo RevisionRepository, revSuppressor RevisionSuppressor) PageSuppressor {
 	return &pageSuppressorImpl{
 		revRepo:       revRepo,
 		revSuppressor: revSuppressor,
 	}
+}
+
+type pageSuppressorImpl struct {
+	revRepo       RevisionRepository
+	revSuppressor RevisionSuppressor
 }
 
 func (ps pageSuppressorImpl) SuppressPageByName(name string) error {

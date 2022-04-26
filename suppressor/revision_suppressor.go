@@ -10,12 +10,12 @@ type RevisionSuppressor interface {
 	SuppressRevisions(revs []mediawiki.Revision) error
 }
 
-type revisionSuppressorImpl struct {
-	api mediawiki.Api
-}
-
 func NewRevisionSuppressor(api mediawiki.Api) RevisionSuppressor {
 	return &revisionSuppressorImpl{api: api}
+}
+
+type revisionSuppressorImpl struct {
+	api mediawiki.Api
 }
 
 // Update the list of suppressed pages in a separate process

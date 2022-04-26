@@ -8,7 +8,6 @@ import (
 	"log"
 	"net/http"
 	"os"
-	"strings"
 	"time"
 )
 
@@ -40,15 +39,11 @@ func main() {
 	client.Timeout = 15 * time.Second
 
 	api := mediawiki.NewApi(os.Getenv(config.EnvApiEndpoint), client, tokenFn)
-	repo := suppressor.NewRepository(api)
-	suppressedPagesStr, err := repo.GetLatestPageContent(os.Getenv(config.EnvSuppressionListName))
-	if err != nil {
-		log.Fatalln(err)
-	}
+	revRepo := suppressor.NewRepository(api)
+	pageRepo := suppressor.NewPageRepository(revRepo, os.Getenv(config.EnvSuppressionListName))
+	suppressedPages, err := pageRepo.GetAllSuppressed()
 
-	suppressedPages := strings.Split(suppressedPagesStr, "\n")
-
-	pageSuppressor := suppressor.NewPageSuppressor(repo, suppressor.NewRevisionSuppressor(api))
+	pageSuppressor := suppressor.NewPageSuppressor(revRepo, suppressor.NewRevisionSuppressor(api))
 
 	for _, pageName := range suppressedPages {
 		err = pageSuppressor.SuppressPageByName(pageName)
