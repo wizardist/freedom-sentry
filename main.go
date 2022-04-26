@@ -41,14 +41,24 @@ func main() {
 	api := mediawiki.NewApi(os.Getenv(config.EnvApiEndpoint), client, tokenFn)
 	revRepo := suppressor.NewRepository(api)
 	pageRepo := suppressor.NewPageRepository(revRepo, os.Getenv(config.EnvSuppressionListName))
-	suppressedPages, err := pageRepo.GetAllSuppressed()
 
 	pageSuppressor := suppressor.NewPageSuppressor(revRepo, suppressor.NewRevisionSuppressor(api))
 
+	runSuppression(pageRepo, pageSuppressor)
+
+	for range time.Tick(15 * time.Minute) {
+		runSuppression(pageRepo, pageSuppressor)
+	}
+}
+
+func runSuppression(pageRepo suppressor.PageRepository, pageSuppressor suppressor.PageSuppressor) {
+	log.Println("running a new suppression job")
+
+	suppressedPages, err := pageRepo.GetAllSuppressed()
 	for _, pageName := range suppressedPages {
 		err = pageSuppressor.SuppressPageByName(pageName)
 		if err != nil {
-			log.Fatalln(err)
+			log.Printf("failed to suppress [%s] revisions: %v", pageName, err)
 		}
 	}
 }
