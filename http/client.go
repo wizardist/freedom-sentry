@@ -1,6 +1,11 @@
 package http
 
-import gohttp "net/http"
+import (
+	"golang.org/x/time/rate"
+	gohttp "net/http"
+	"net/url"
+	"time"
+)
 
 type Client interface {
 	// Do sends an HTTP request and returns an HTTP response, following
@@ -40,4 +45,34 @@ type Client interface {
 	// Any returned error will be of type *url.Error. The url.Error
 	// value's Timeout method will report true if the request timed out.
 	Do(req *gohttp.Request) (*gohttp.Response, error)
+}
+
+const maxConnections = 3
+const maxConnectionsWindow = 200 * time.Millisecond // 5 req/s
+
+type emptyJar struct{}
+
+func (j *emptyJar) SetCookies(_ *url.URL, _ []*gohttp.Cookie) {}
+func (j *emptyJar) Cookies(_ *url.URL) (cookies []*gohttp.Cookie) {
+	return cookies
+}
+
+var DefaultClient = makeClient()
+
+func makeClient() Client {
+	return &retryClient{
+		client: &ratelimitClient{
+			client: &defaultClient{
+				client: &gohttp.Client{
+					Timeout: time.Second * 30,
+					Transport: &gohttp.Transport{
+
+						DisableKeepAlives: true,
+					},
+					Jar: &emptyJar{},
+				},
+			},
+			limiter: rate.NewLimiter(rate.Every(maxConnectionsWindow), maxConnections),
+		},
+	}
 }

@@ -2,11 +2,11 @@ package main
 
 import (
 	"freedom-sentry/config"
+	"freedom-sentry/http"
 	"freedom-sentry/mediawiki"
 	"freedom-sentry/mediawiki/action/query"
 	"freedom-sentry/suppressor"
 	"log"
-	"net/http"
 	"os"
 	"time"
 )
@@ -35,10 +35,7 @@ func main() {
 		return csrfToken, nil
 	}
 
-	client := &http.Client{}
-	client.Timeout = 15 * time.Second
-
-	api := mediawiki.NewApi(os.Getenv(config.EnvApiEndpoint), client, tokenFn)
+	api := mediawiki.NewApi(os.Getenv(config.EnvApiEndpoint), http.DefaultClient, tokenFn)
 	revRepo := suppressor.NewRepository(api)
 	pageRepo := suppressor.NewPageRepository(revRepo, os.Getenv(config.EnvSuppressionListName))
 
