@@ -13,15 +13,16 @@ type batchingSuppressor struct {
 	size       int
 	suppressor RevisionSuppressor
 
-	buffer []mediawiki.Revision
-	lock   sync.Mutex
+	initOnce sync.Once // Constraint to initialize everything below safely
+	buffer   []mediawiki.Revision
+	lock     sync.Mutex
 
 	drainRequest      chan bool
 	forceDrainRequest chan bool
 }
 
 func (b *batchingSuppressor) SuppressRevisions(revs []mediawiki.Revision) error {
-	b.init()
+	b.initOnce.Do(b.init)
 
 	if len(revs) == 0 {
 		return nil

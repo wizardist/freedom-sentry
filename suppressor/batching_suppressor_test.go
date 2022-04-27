@@ -20,6 +20,7 @@ func Test_batchingSuppressor_SuppressRevisions(t *testing.T) {
 			invocations: [][]mediawiki.Revision{
 				{}, {}, {},
 			},
+			forceDrain: 15, // Will tolerate draining on empty buffer
 		},
 		{
 			name: "Will call API once",
