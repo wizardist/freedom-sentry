@@ -25,10 +25,16 @@ func (c *ratelimitClient) Do(req *http.Request) (*http.Response, error) {
 		return nil, err
 	}
 
-	if resp != nil && resp.StatusCode == http.StatusTooManyRequests {
+	if resp != nil && (resp.StatusCode == http.StatusTooManyRequests || isRateLimited(resp)) {
 		reservation := c.limiter.ReserveN(time.Now().Add(3*time.Second), c.limiter.Burst())
 		time.Sleep(reservation.Delay())
 	}
 
 	return resp, nil
+}
+
+func isRateLimited(resp *http.Response) bool {
+	errorHeaderValue := resp.Header.Get("MediaWiki-API-Error")
+
+	return errorHeaderValue == "ratelimited"
 }
