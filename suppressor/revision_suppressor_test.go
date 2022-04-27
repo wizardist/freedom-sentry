@@ -3,8 +3,8 @@ package suppressor
 import (
 	"errors"
 	"freedom-sentry/mediawiki"
-	"freedom-sentry/mediawiki/action/revisiondelete"
 	"reflect"
+	"strings"
 	"testing"
 )
 
@@ -25,24 +25,58 @@ func (m *mockApi) Execute(action mediawiki.Action) error {
 	return nil
 }
 
-func TestSuppressRevisions(t *testing.T) {
+type mockSuppressor struct {
+	called      bool
+	callCount   int
+	revs        []mediawiki.Revision
+	throwError  bool
+	callHistory string
+}
+
+func (m *mockSuppressor) SuppressRevisions(revs []mediawiki.Revision) error {
+	m.called = true
+	m.revs = revs
+	m.addHistory(revs)
+
+	if m.throwError {
+		return errors.New("dummy error")
+	}
+
+	return nil
+}
+
+func (m *mockSuppressor) addHistory(revs []mediawiki.Revision) {
+	m.callCount++
+
+	batch := make([]string, len(revs))
+	for i, rev := range revs {
+		batch[i] = string(rev.Id)
+	}
+
+	if m.callCount > 1 {
+		m.callHistory += "|"
+	}
+
+	m.callHistory += strings.Join(batch, ",")
+}
+
+func Test_filteringRevisionSuppressor_SuppressRevisions(t *testing.T) {
 	tests := []struct {
-		name         string
-		revs         []mediawiki.Revision
-		expected     []mediawiki.RevisionId
-		wantSuppress bool
-		wantErr      bool
+		name     string
+		revs     []mediawiki.Revision
+		expected []mediawiki.Revision
+		wantErr  bool
 	}{
 		{
 			name:     "Nils",
 			revs:     nil,
-			expected: []mediawiki.RevisionId{},
+			expected: []mediawiki.Revision{},
 			wantErr:  false,
 		},
 		{
 			name:     "Empties",
 			revs:     []mediawiki.Revision{},
-			expected: []mediawiki.RevisionId{},
+			expected: []mediawiki.Revision{},
 			wantErr:  false,
 		},
 		{
@@ -51,7 +85,7 @@ func TestSuppressRevisions(t *testing.T) {
 				{Id: "1", IsSuppressed: true},
 				{Id: "2", IsSuppressed: true},
 			},
-			expected: []mediawiki.RevisionId{},
+			expected: []mediawiki.Revision{},
 			wantErr:  false,
 		},
 		{
@@ -60,9 +94,10 @@ func TestSuppressRevisions(t *testing.T) {
 				{Id: "1", IsSuppressed: false},
 				{Id: "2", IsSuppressed: true},
 			},
-			expected:     []mediawiki.RevisionId{"1"},
-			wantSuppress: true,
-			wantErr:      false,
+			expected: []mediawiki.Revision{
+				{Id: "1", IsSuppressed: false},
+			},
+			wantErr: false,
 		},
 		{
 			name: "All are suppressed",
@@ -70,9 +105,11 @@ func TestSuppressRevisions(t *testing.T) {
 				{Id: "1", IsSuppressed: false},
 				{Id: "2", IsSuppressed: false},
 			},
-			expected:     []mediawiki.RevisionId{"1", "2"},
-			wantSuppress: true,
-			wantErr:      false,
+			expected: []mediawiki.Revision{
+				{Id: "1", IsSuppressed: false},
+				{Id: "2", IsSuppressed: false},
+			},
+			wantErr: false,
 		},
 		{
 			name: "Error from fn",
@@ -80,38 +117,29 @@ func TestSuppressRevisions(t *testing.T) {
 				{Id: "1", IsSuppressed: false},
 				{Id: "2", IsSuppressed: false},
 			},
-			expected:     []mediawiki.RevisionId{"1", "2"},
-			wantSuppress: true,
-			wantErr:      true,
+			expected: []mediawiki.Revision{
+				{Id: "1", IsSuppressed: false},
+				{Id: "2", IsSuppressed: false},
+			},
+			wantErr: true,
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			api := &mockApi{
-				executeThrowError: tt.wantErr,
+			suppressor := &mockSuppressor{
+				throwError: tt.wantErr,
 			}
 
-			rs := revisionSuppressorImpl{api: api}
+			rs := filteringRevisionSuppressor{suppressor: suppressor}
 			err := rs.SuppressRevisions(tt.revs)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("SuppressRevisions() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
-			if tt.wantSuppress != api.executeCalled {
-				t.Errorf("Had to be suppressed but the API was not invoked")
-				return
-			}
 
-			expectedAction := revisiondelete.RevisionDelete{
-				Type:        "revision",
-				Revisions:   tt.expected,
-				HideDetails: []string{"user", "comment"},
-				Suppress:    mediawiki.TextBoolYes,
-			}
-
-			if tt.wantSuppress && !reflect.DeepEqual(expectedAction, api.executeAction) {
-				t.Errorf("SuppressRevisions(), bad action: got = %v, want %v", api.executeAction, expectedAction)
+			if !reflect.DeepEqual(tt.expected, suppressor.revs) {
+				t.Errorf("SuppressRevisions(), bad action: got = %v, want %v", suppressor.revs, tt.expected)
 			}
 		})
 	}
