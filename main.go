@@ -39,16 +39,74 @@ func main() {
 	revRepo := suppressor.NewRepository(api)
 	pageRepo := suppressor.NewPageRepository(revRepo, os.Getenv(config.EnvSuppressionListName))
 
-	pageSuppressor := suppressor.NewPageSuppressor(revRepo, suppressor.NewRevisionSuppressor(api))
+	revSuppressor := suppressor.NewRevisionSuppressor(api)
+	pageSuppressor := suppressor.NewPageSuppressor(revRepo, revSuppressor)
 
-	runSuppression(pageRepo, pageSuppressor)
+	done := make(chan bool)
 
-	for range time.Tick(15 * time.Minute) {
-		runSuppression(pageRepo, pageSuppressor)
+	go scheduleListSuppressor(pageRepo, pageSuppressor)
+	go scheduleRecentChangeSuppressor(revRepo, pageRepo, revSuppressor)
+
+	<-done
+}
+
+func scheduleRecentChangeSuppressor(revRepo suppressor.RevisionRepository, pageRepo suppressor.PageRepository, revSuppressor suppressor.RevisionSuppressor) {
+	lastProcessed := suppressRecentChanges(time.Now().Add(-30*time.Minute), revRepo, pageRepo, revSuppressor)
+
+	for range time.Tick(5 * time.Second) {
+		lastProcessed = suppressRecentChanges(lastProcessed, revRepo, pageRepo, revSuppressor)
 	}
 }
 
-func runSuppression(pageRepo suppressor.PageRepository, pageSuppressor suppressor.PageSuppressor) {
+func suppressRecentChanges(since time.Time, repo suppressor.RevisionRepository, pageRepo suppressor.PageRepository, revSuppressor suppressor.RevisionSuppressor) time.Time {
+	changes, err := repo.GetRecentChanges(since)
+	if err != nil {
+		log.Println("failed to get recent changes since", since, "error:", err)
+		return time.Time{}
+	}
+
+	mostRecent := since
+	list, err := pageRepo.GetAllSuppressed()
+	if err != nil {
+		log.Println("failed to get suppression list:", err)
+		return mostRecent
+	}
+
+	indexedList := make(map[string]bool, len(list))
+	for _, title := range list {
+		indexedList[title] = true
+	}
+
+	revs := make([]mediawiki.Revision, 0, len(changes))
+	for _, rev := range changes {
+		if rev.Timestamp.After(mostRecent) {
+			mostRecent = rev.Timestamp
+		}
+
+		if _, inList := indexedList[rev.Title]; !inList {
+			continue
+		}
+
+		revs = append(revs, rev)
+	}
+
+	err = revSuppressor.SuppressRevisions(revs)
+	if err != nil {
+		log.Println("failed to suppress revisions", revs)
+	}
+
+	return mostRecent
+}
+
+func scheduleListSuppressor(pageRepo suppressor.PageRepository, pageSuppressor suppressor.PageSuppressor) {
+	suppressList(pageRepo, pageSuppressor)
+
+	for range time.Tick(15 * time.Minute) {
+		suppressList(pageRepo, pageSuppressor)
+	}
+}
+
+func suppressList(pageRepo suppressor.PageRepository, pageSuppressor suppressor.PageSuppressor) {
 	log.Println("running a new suppression job")
 
 	suppressedPages, err := pageRepo.GetAllSuppressed()

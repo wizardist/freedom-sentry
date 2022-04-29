@@ -3,8 +3,10 @@ package query
 import (
 	"errors"
 	"freedom-sentry/mediawiki"
+	"freedom-sentry/util"
 	"reflect"
 	"testing"
+	"time"
 )
 
 func TestQuery_ToActionPayload(t *testing.T) {
@@ -57,6 +59,29 @@ func TestQuery_ToActionPayload(t *testing.T) {
 				"type":   []string{"csrf"},
 			},
 		},
+		{
+			name: "list=recentchanges",
+			query: Query{
+				List: []List{
+					&RecentChangesQueryList{
+						Start:     util.WithoutErr(time.Parse(time.RFC3339, "2022-04-20T12:13:14Z")),
+						Direction: "newer",
+						Show:      []string{"!bot"},
+						Limit:     5000,
+						Types:     []string{"edit"},
+					},
+				},
+			},
+			want: map[string]interface{}{
+				"action":  "query",
+				"list":    "recentchanges",
+				"rcstart": "2022-04-20T12:13:14Z",
+				"rcdir":   "newer",
+				"rcshow":  []string{"!bot"},
+				"rclimit": 5000,
+				"rctype":  []string{"edit"},
+			},
+		},
 	}
 
 	for _, tt := range tests {
@@ -98,14 +123,31 @@ func (qm *mockMeta) setResponse(map[string]interface{}) error {
 	return nil
 }
 
+type mockList struct {
+	throwError  bool
+	responseSet bool
+}
+
+func (ml mockList) ToListPayload() map[string]interface{} { return nil }
+func (ml *mockList) setResponse(map[string]interface{}) error {
+	if ml.throwError {
+		return errors.New("dummy error")
+	}
+
+	ml.responseSet = true
+	return nil
+}
+
 func TestQuery_SetResponse(t *testing.T) {
 	tests := []struct {
 		name         string
 		props        []Property
 		meta         []Meta
+		list         []List
 		payload      map[string]interface{}
 		wantPropsSet bool
 		wantMetaSet  bool
+		wantListSet  bool
 		wantErr      bool
 	}{
 		{
@@ -180,6 +222,21 @@ func TestQuery_SetResponse(t *testing.T) {
 			},
 			wantMetaSet: true,
 		},
+		{
+			name: "List",
+			list: []List{
+				&mockList{}, &mockList{},
+			},
+			payload: map[string]interface{}{
+				"batchcomplete": "",
+				"query": map[string]interface{}{
+					"listthing": map[string]interface{}{
+						"some": "thing",
+					},
+				},
+			},
+			wantListSet: true,
+		},
 	}
 
 	for _, tt := range tests {
@@ -187,6 +244,7 @@ func TestQuery_SetResponse(t *testing.T) {
 			a := Query{
 				Properties: tt.props,
 				Meta:       tt.meta,
+				List:       tt.list,
 			}
 
 			if err := a.SetResponse(tt.payload); (err != nil) != tt.wantErr {
@@ -201,6 +259,11 @@ func TestQuery_SetResponse(t *testing.T) {
 			for _, m := range a.Meta {
 				if m.(*mockMeta).responseSet != tt.wantMetaSet {
 					t.Errorf("Meta.responseSet = %v but wanted %v", m.(*mockMeta).responseSet, tt.wantMetaSet)
+				}
+			}
+			for _, l := range a.List {
+				if l.(*mockList).responseSet != tt.wantListSet {
+					t.Errorf("List.responseSet = %v but wanted %v", l.(*mockList).responseSet, tt.wantListSet)
 				}
 			}
 		})

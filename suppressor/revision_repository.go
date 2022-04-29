@@ -3,11 +3,13 @@ package suppressor
 import (
 	"freedom-sentry/mediawiki"
 	"freedom-sentry/mediawiki/action/query"
+	"time"
 )
 
 type RevisionRepository interface {
 	GetAllByPageName(name string) ([]mediawiki.Revision, error)
 	GetLatestPageContent(name string) (string, error)
+	GetRecentChanges(since time.Time) ([]mediawiki.Revision, error)
 }
 
 func NewRepository(api mediawiki.Api) RevisionRepository {
@@ -58,4 +60,21 @@ func (rr *revRepoImpl) GetLatestPageContent(name string) (string, error) {
 	}
 
 	return revisions[0].Content, nil
+}
+
+func (rr *revRepoImpl) GetRecentChanges(since time.Time) ([]mediawiki.Revision, error) {
+	changes := query.RecentChangesQueryList{
+		Start:      since,
+		Direction:  "newer",
+		Properties: []string{"title", "timestamp", "ids", "user"},
+		Show:       []string{"!bot"},
+		Limit:      5000,
+		Types:      []string{"edit"},
+	}
+	action := query.Query{
+		List: []query.List{&changes},
+	}
+	err := rr.api.Execute(action)
+
+	return changes.GetRecentChanges(), err
 }
