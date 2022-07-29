@@ -18,7 +18,8 @@ import (
 const userAgent = "FreedomSentry/1"
 const writeTokenKey = "token"
 
-type TokenRequestFn func(api Api) (string, error)
+type Token string
+type TokenRequestFn func(api Api) (Token, error)
 
 type apiImpl struct {
 	httpClient http.Client

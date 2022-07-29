@@ -36,12 +36,12 @@ type mockTokenFn struct {
 	throwError bool
 }
 
-func (t *mockTokenFn) tokenFn(Api) (string, error) {
+func (t *mockTokenFn) tokenFn(Api) (Token, error) {
 	if t.throwError {
 		return "", errors.New("dummy error")
 	}
 
-	return t.token, nil
+	return Token(t.token), nil
 }
 
 type throwingReadCloser struct{}

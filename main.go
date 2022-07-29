@@ -12,7 +12,7 @@ import (
 )
 
 func main() {
-	tokenFn := func(api mediawiki.Api) (string, error) {
+	tokenFn := func(api mediawiki.Api) (mediawiki.Token, error) {
 		tokensQm := &query.TokensQueryMeta{
 			Type: []string{"csrf"},
 		}
@@ -32,7 +32,7 @@ func main() {
 
 		log.Println("acquired a new CSRF token:", csrfToken)
 
-		return csrfToken, nil
+		return mediawiki.Token(csrfToken), nil
 	}
 
 	api := mediawiki.NewApi(os.Getenv(config.EnvApiEndpoint), http.DefaultClient, tokenFn)

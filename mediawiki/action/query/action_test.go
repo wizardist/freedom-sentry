@@ -79,6 +79,7 @@ func TestQuery_ToActionPayload(t *testing.T) {
 				"rcdir":   "newer",
 				"rcshow":  []string{"!bot"},
 				"rclimit": 5000,
+				"rcprop":  util.CreateNilSlice[string](),
 				"rctype":  []string{"edit"},
 			},
 		},

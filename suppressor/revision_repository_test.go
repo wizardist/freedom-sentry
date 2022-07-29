@@ -34,9 +34,10 @@ func Test_revRepoImpl_GetRecentChanges(t *testing.T) {
 				"rcdir":   "newer",
 				"rcshow":  []string{"!bot"},
 				"rclimit": 5000,
+				"rcprop":  []string{"title", "timestamp", "ids", "user"},
 				"rctype":  []string{"edit"},
 			},
-			want: []mediawiki.Revision{},
+			want: util.CreateNilSlice[mediawiki.Revision](),
 		},
 		// FIXME: Not tested
 	}
