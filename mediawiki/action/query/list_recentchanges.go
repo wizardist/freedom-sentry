@@ -38,7 +38,6 @@ func (r *RecentChangesQueryList) setResponse(json map[string]interface{}) error 
 	revs := make([]mediawiki.Revision, len(rawRevs))
 
 	for i, rawRev := range rawRevs {
-
 		rev := mediawiki.Revision{
 			Id: mediawiki.RevisionIdFromAny(rawRev["revid"]),
 		}

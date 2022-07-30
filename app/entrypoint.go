@@ -1,0 +1,55 @@
+package app
+
+import (
+	"fmt"
+	"freedom-sentry/config"
+	"freedom-sentry/http"
+	"freedom-sentry/mediawiki"
+	"freedom-sentry/mediawiki/action/query"
+	"freedom-sentry/suppressor"
+	"os"
+)
+
+func Run() {
+	apiEndpoint := os.Getenv(config.EnvApiEndpoint)
+	suppressionListName := os.Getenv(config.EnvSuppressionListName)
+
+	api := mediawiki.NewApi(apiEndpoint, http.DefaultClient, acquireCsrfTokenFn)
+
+	validateAccess(api)
+
+	revRepo := suppressor.NewRepository(api)
+
+	revSuppressor := suppressor.NewRevisionSuppressor(api)
+	pageSuppressor := suppressor.NewPageSuppressor(revRepo, revSuppressor)
+
+	pageRepo := suppressor.NewPageRepository(revRepo, suppressionListName)
+
+	done := make(chan bool)
+
+	go scheduleListSuppressor(pageRepo, pageSuppressor)
+	go scheduleRecentChangeSuppressor(revRepo, pageRepo, revSuppressor)
+
+	<-done
+}
+
+// validateAccess panics if the given access credentials do not provide suppression capability.
+func validateAccess(api mediawiki.Api) {
+	userinfoQuery := query.UserinfoMetaQuery{Properties: []string{"rights"}}
+	action := query.Query{Meta: []query.Meta{&userinfoQuery}}
+
+	err := api.Execute(action)
+	if err != nil {
+		panic(fmt.Errorf("failed to retrieve user access rights: %w", err))
+	}
+
+	userinfo := userinfoQuery.GetUserinfo()
+
+	for _, right := range userinfo.Rights {
+		if right == "suppressrevision" {
+			return
+		}
+	}
+
+	panic("the configured access token doesn't allow suppressing revisions")
+}

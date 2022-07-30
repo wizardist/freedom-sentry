@@ -1,6 +1,6 @@
 package query
 
-type TokensQueryMeta struct {
+type TokensMetaQuery struct {
 	// FIXME: Only supports CSRF token requests
 
 	Type []string
@@ -10,18 +10,18 @@ type TokensQueryMeta struct {
 	}
 }
 
-func (qm TokensQueryMeta) ToMetaPayload() map[string]interface{} {
+func (qm TokensMetaQuery) ToMetaPayload() map[string]interface{} {
 	return map[string]interface{}{
 		"meta": "tokens",
 		"type": qm.Type,
 	}
 }
 
-func (qm TokensQueryMeta) GetTokens() struct{ Csrf string } {
+func (qm TokensMetaQuery) GetTokens() struct{ Csrf string } {
 	return qm.tokens
 }
 
-func (qm *TokensQueryMeta) setResponse(json map[string]interface{}) error {
+func (qm *TokensMetaQuery) setResponse(json map[string]interface{}) error {
 	tokens := json["tokens"].(map[string]interface{})
 
 	qm.tokens.Csrf = tokens["csrftoken"].(string)

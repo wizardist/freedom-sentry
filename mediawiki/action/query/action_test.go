@@ -48,7 +48,7 @@ func TestQuery_ToActionPayload(t *testing.T) {
 			name: "meta=tokens",
 			query: Query{
 				Meta: []Meta{
-					&TokensQueryMeta{
+					&TokensMetaQuery{
 						Type: []string{"csrf"},
 					},
 				},
@@ -451,7 +451,7 @@ func TestTokensQueryMeta_GetTokens(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			qm := TokensQueryMeta{
+			qm := TokensMetaQuery{
 				Type: tt.types,
 			}
 			err := qm.setResponse(tt.payload)
