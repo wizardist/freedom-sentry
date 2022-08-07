@@ -12,7 +12,6 @@ import (
 
 func Run() {
 	apiEndpoint := os.Getenv(config.EnvApiEndpoint)
-	suppressionListName := os.Getenv(config.EnvSuppressionListName)
 
 	api := mediawiki.NewApi(apiEndpoint, http.DefaultClient, acquireCsrfTokenFn)
 
@@ -23,12 +22,12 @@ func Run() {
 	revSuppressor := suppressor.NewRevisionSuppressor(api)
 	pageSuppressor := suppressor.NewPageSuppressor(revRepo, revSuppressor)
 
-	pageRepo := suppressor.NewPageRepository(revRepo, suppressionListName)
+	pageRepo, listPurgeChan := suppressor.NewPageRepository(revRepo, config.GetSuppressionListName())
 
 	done := make(chan bool)
 
 	go scheduleListSuppressor(pageRepo, pageSuppressor)
-	go scheduleRecentChangeSuppressor(revRepo, pageRepo, revSuppressor)
+	go scheduleRecentChangeSuppressor(pageRepo, revSuppressor, listPurgeChan, revRepo)
 
 	<-done
 }

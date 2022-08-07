@@ -1,10 +1,13 @@
 package config
 
-import "flag"
+import (
+	"flag"
+	"os"
+)
 
 const EnvAccessToken = "ACCESS_TOKEN"
 const EnvApiEndpoint = "API_ENDPOINT"
-const EnvSuppressionListName = "LIST_NAME"
+const envSuppressionListName = "LIST_NAME"
 
 var isInitFullscanSkipped bool
 
@@ -16,4 +19,8 @@ func init() {
 
 func IsInitFullscanSkipped() bool {
 	return isInitFullscanSkipped
+}
+
+func GetSuppressionListName() string {
+	return os.Getenv(envSuppressionListName)
 }

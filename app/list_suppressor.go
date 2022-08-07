@@ -7,7 +7,7 @@ import (
 	"time"
 )
 
-func scheduleListSuppressor(pageRepo suppressor.PageRepository, pageSuppressor suppressor.PageSuppressor) {
+func scheduleListSuppressor(pageRepo suppressor.SuppressedPageRepository, pageSuppressor suppressor.PageSuppressor) {
 	if !config.IsInitFullscanSkipped() {
 		suppressList(pageRepo, pageSuppressor)
 	}
@@ -17,10 +17,10 @@ func scheduleListSuppressor(pageRepo suppressor.PageRepository, pageSuppressor s
 	}
 }
 
-func suppressList(pageRepo suppressor.PageRepository, pageSuppressor suppressor.PageSuppressor) {
+func suppressList(pageRepo suppressor.SuppressedPageRepository, pageSuppressor suppressor.PageSuppressor) {
 	log.Println("running a new suppression job")
 
-	suppressedPages, err := pageRepo.GetAllSuppressed()
+	suppressedPages, err := pageRepo.GetAll()
 	for _, pageName := range suppressedPages {
 		err = pageSuppressor.SuppressPageByName(pageName)
 		if err != nil {
