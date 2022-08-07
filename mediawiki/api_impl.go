@@ -38,7 +38,7 @@ func NewApi(endpoint string, client http.Client, tokenFn TokenRequestFn) Api {
 func (api *apiImpl) Execute(action Action) error {
 	payload := action.ToActionPayload()
 
-	log.Println("executing action", payload["action"])
+	log.Println("executing action", payload)
 
 	if action.IsWriteAction() {
 		log.Println("injecting token for a write action")

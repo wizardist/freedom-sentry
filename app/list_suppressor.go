@@ -1,13 +1,16 @@
 package app
 
 import (
+	"freedom-sentry/config"
 	"freedom-sentry/suppressor"
 	"log"
 	"time"
 )
 
 func scheduleListSuppressor(pageRepo suppressor.PageRepository, pageSuppressor suppressor.PageSuppressor) {
-	suppressList(pageRepo, pageSuppressor)
+	if !config.IsInitFullscanSkipped() {
+		suppressList(pageRepo, pageSuppressor)
+	}
 
 	for range time.Tick(15 * time.Minute) {
 		suppressList(pageRepo, pageSuppressor)
