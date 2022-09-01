@@ -18,6 +18,15 @@ func NewPageRepository(revRepo RevisionRepository, listName string) (SuppressedP
 		},
 	}
 
+	go func() {
+		for {
+			select {
+			case <-repo.purgeChan:
+				repo.timestamp = time.Time{}
+			}
+		}
+	}()
+
 	return repo, repo.purgeChan
 }
 
