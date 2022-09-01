@@ -13,19 +13,21 @@ type RecentChangesQueryList struct {
 	Show       []string
 	Limit      int
 	Types      []string
+	TopOnly    bool
 
 	recentChanges []mediawiki.Revision
 }
 
 func (r RecentChangesQueryList) ToListPayload() map[string]interface{} {
 	return map[string]interface{}{
-		"list":    "recentchanges",
-		"rcstart": r.Start.Format(time.RFC3339),
-		"rcdir":   r.Direction,
-		"rcprop":  r.Properties,
-		"rcshow":  r.Show,
-		"rclimit": r.Limit,
-		"rctype":  r.Types,
+		"list":      "recentchanges",
+		"rcstart":   r.Start.Format(time.RFC3339),
+		"rcdir":     r.Direction,
+		"rcprop":    r.Properties,
+		"rcshow":    r.Show,
+		"rclimit":   r.Limit,
+		"rctype":    r.Types,
+		"rctoponly": r.TopOnly,
 	}
 }
 

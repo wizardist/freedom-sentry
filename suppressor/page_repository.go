@@ -18,6 +18,8 @@ func NewPageRepository(revRepo RevisionRepository, listName string) (SuppressedP
 		},
 	}
 
+	repo.purgeChan = make(chan bool)
+
 	go func() {
 		for {
 			select {

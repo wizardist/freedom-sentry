@@ -11,7 +11,7 @@ const envSuppressionListName = "LIST_NAME"
 
 var isInitFullscanSkipped bool
 
-func init() {
+func InitFlags() {
 	flag.BoolVar(&isInitFullscanSkipped, "skip-init-fullscan", false, "")
 
 	flag.Parse()

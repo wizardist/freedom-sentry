@@ -58,14 +58,22 @@ func createHandlerChangeForSuppressor(pageRepo suppressor.SuppressedPageReposito
 	}
 }
 
-func createHandlerForListPurge(purgeChan chan bool) changeHandlerFunc {
+func createHandlerForListUpdate(listUpdatedChan chan bool) changeHandlerFunc {
+	var lastSeenListRev mediawiki.RevisionId
+
 	return func(changes []mediawiki.Revision) error {
 		for _, rev := range changes {
 			if rev.Title != config.GetSuppressionListName() {
 				continue
 			}
 
-			purgeChan <- true
+			if rev.Id == lastSeenListRev {
+				continue
+			}
+
+			lastSeenListRev = rev.Id
+
+			listUpdatedChan <- true
 		}
 
 		return nil

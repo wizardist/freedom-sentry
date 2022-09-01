@@ -22,12 +22,24 @@ func Run() {
 	revSuppressor := suppressor.NewRevisionSuppressor(api)
 	pageSuppressor := suppressor.NewPageSuppressor(revRepo, revSuppressor)
 
+	listUpdatedChan := make(chan bool)
+
 	pageRepo, listPurgeChan := suppressor.NewPageRepository(revRepo, config.GetSuppressionListName())
+
+	go func() {
+		for {
+			select {
+			case <-listUpdatedChan:
+				listPurgeChan <- true
+				suppressList(pageRepo, pageSuppressor)
+			}
+		}
+	}()
 
 	done := make(chan bool)
 
 	go scheduleListSuppressor(pageRepo, pageSuppressor)
-	go scheduleRecentChangeSuppressor(pageRepo, revSuppressor, listPurgeChan, revRepo)
+	go scheduleRecentChangeSuppressor(pageRepo, revSuppressor, listUpdatedChan, revRepo)
 
 	<-done
 }

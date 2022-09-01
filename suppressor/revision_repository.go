@@ -70,6 +70,7 @@ func (rr *revRepoImpl) GetRecentChanges(since time.Time) ([]mediawiki.Revision, 
 		Show:       []string{"!bot"},
 		Limit:      5000,
 		Types:      []string{"edit"},
+		TopOnly:    true,
 	}
 	action := query.Query{
 		List: []query.List{&changes},

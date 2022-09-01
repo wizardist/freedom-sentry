@@ -24,7 +24,7 @@ func scanChanges(repo suppressor.RevisionRepository, since time.Time, changeProc
 
 	for _, change := range changes {
 		if change.Timestamp.After(mostRecent) {
-			mostRecent = change.Timestamp
+			mostRecent = change.Timestamp.Add(time.Second)
 		}
 	}
 

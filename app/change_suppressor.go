@@ -6,12 +6,12 @@ import (
 	"time"
 )
 
-func scheduleRecentChangeSuppressor(pageRepo suppressor.SuppressedPageRepository, revSuppressor suppressor.RevisionSuppressor, purgeChan chan bool, revRepo suppressor.RevisionRepository) {
+func scheduleRecentChangeSuppressor(pageRepo suppressor.SuppressedPageRepository, revSuppressor suppressor.RevisionSuppressor, listUpdatedChan chan bool, revRepo suppressor.RevisionRepository) {
 	changeProcessor := make(chan []mediawiki.Revision)
 
 	subhandlers := []changeHandlerFunc{
+		createHandlerForListUpdate(listUpdatedChan),
 		createHandlerChangeForSuppressor(pageRepo, revSuppressor),
-		createHandlerForListPurge(purgeChan),
 	}
 	handleChanges := createChangesHandler(subhandlers, changeProcessor)
 
