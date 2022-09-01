@@ -47,7 +47,20 @@ func (p suppressedPageRepoImpl) GetAll() ([]string, error) {
 }
 
 func rawPageListToSlice(suppressedPagesStr string) []string {
-	return strings.Split(suppressedPagesStr, "\n")
+	lines := strings.Split(suppressedPagesStr, "\n")
+
+	list := make([]string, 0, len(lines))
+	for _, line := range lines {
+		trimmed := strings.TrimSpace(line)
+
+		if trimmed == "" {
+			continue
+		}
+
+		list = append(list, trimmed)
+	}
+
+	return list
 }
 
 type cachingSuppressedPageRepoImpl struct {
