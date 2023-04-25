@@ -7,10 +7,23 @@ import (
 	"freedom-sentry/mediawiki"
 	"freedom-sentry/mediawiki/action/query"
 	"freedom-sentry/suppressor"
+	"freedom-sentry/util"
 	"os"
 )
 
-func Run() {
+type App struct {
+	isDryMode bool
+}
+
+func NewApp(opts ...util.Option[App]) *App {
+	a := &App{}
+
+	util.ApplyOptions(a, opts...)
+
+	return a
+}
+
+func (App) Run() {
 	apiEndpoint := os.Getenv(config.EnvApiEndpoint)
 
 	api := mediawiki.NewApi(apiEndpoint, http.DefaultClient, acquireCsrfTokenFn)

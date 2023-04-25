@@ -15,5 +15,6 @@ func main() {
 		log.Println(http.ListenAndServe("localhost:6060", nil))
 	}()
 
-	app.Run()
+	a := app.NewApp(app.WithDryMode(false))
+	a.Run()
 }
