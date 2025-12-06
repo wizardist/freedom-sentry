@@ -3,9 +3,6 @@ package mediawiki
 import (
 	"encoding/json"
 	"fmt"
-	"freedom-sentry/config"
-	"freedom-sentry/http"
-	"freedom-sentry/util"
 	"io/ioutil"
 	"log"
 	gohttp "net/http"
@@ -13,6 +10,10 @@ import (
 	"os"
 	"reflect"
 	"strings"
+
+	"github.com/wizardist/freedom-sentry/config"
+	"github.com/wizardist/freedom-sentry/http"
+	"github.com/wizardist/freedom-sentry/util"
 )
 
 const userAgent = "FreedomSentry/1"

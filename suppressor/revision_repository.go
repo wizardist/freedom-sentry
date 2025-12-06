@@ -1,9 +1,10 @@
 package suppressor
 
 import (
-	"freedom-sentry/mediawiki"
-	"freedom-sentry/mediawiki/action/query"
 	"time"
+
+	"github.com/wizardist/freedom-sentry/mediawiki"
+	"github.com/wizardist/freedom-sentry/mediawiki/action/query"
 )
 
 type RevisionRepository interface {

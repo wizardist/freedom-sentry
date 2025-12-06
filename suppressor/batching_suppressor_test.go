@@ -1,9 +1,10 @@
 package suppressor
 
 import (
-	"freedom-sentry/mediawiki"
 	"testing"
 	"time"
+
+	"github.com/wizardist/freedom-sentry/mediawiki"
 )
 
 func Test_batchingSuppressor_SuppressRevisions(t *testing.T) {

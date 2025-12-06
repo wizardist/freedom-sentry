@@ -1,10 +1,11 @@
 package app
 
 import (
-	"freedom-sentry/mediawiki"
-	"freedom-sentry/suppressor"
 	"log"
 	"time"
+
+	"github.com/wizardist/freedom-sentry/mediawiki"
+	"github.com/wizardist/freedom-sentry/suppressor"
 )
 
 func scanChanges(repo suppressor.RevisionRepository, since time.Time, changeProcessor chan<- []mediawiki.Revision) (time.Time, error) {

@@ -1,9 +1,10 @@
 package app
 
 import (
-	"freedom-sentry/mediawiki"
-	"freedom-sentry/suppressor"
 	"time"
+
+	"github.com/wizardist/freedom-sentry/mediawiki"
+	"github.com/wizardist/freedom-sentry/suppressor"
 )
 
 func scheduleRecentChangeSuppressor(pageRepo suppressor.SuppressedPageRepository, revSuppressor suppressor.RevisionSuppressor, listUpdatedChan chan bool, revRepo suppressor.RevisionRepository) {

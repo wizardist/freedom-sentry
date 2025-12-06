@@ -2,10 +2,11 @@ package http
 
 import (
 	"context"
-	"golang.org/x/time/rate"
 	"log"
 	"net/http"
 	"time"
+
+	"golang.org/x/time/rate"
 )
 
 type ratelimitClient struct {

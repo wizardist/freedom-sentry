@@ -2,8 +2,9 @@ package query
 
 import (
 	"errors"
-	"freedom-sentry/mediawiki"
 	"time"
+
+	"github.com/wizardist/freedom-sentry/mediawiki"
 )
 
 type RecentChangesQueryList struct {

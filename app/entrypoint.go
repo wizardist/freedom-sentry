@@ -2,13 +2,14 @@ package app
 
 import (
 	"fmt"
-	"freedom-sentry/config"
-	"freedom-sentry/http"
-	"freedom-sentry/mediawiki"
-	"freedom-sentry/mediawiki/action/query"
-	"freedom-sentry/suppressor"
-	"freedom-sentry/util"
 	"os"
+
+	"github.com/wizardist/freedom-sentry/config"
+	"github.com/wizardist/freedom-sentry/http"
+	"github.com/wizardist/freedom-sentry/mediawiki"
+	"github.com/wizardist/freedom-sentry/mediawiki/action/query"
+	"github.com/wizardist/freedom-sentry/suppressor"
+	"github.com/wizardist/freedom-sentry/util"
 )
 
 type App struct {

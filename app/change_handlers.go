@@ -1,10 +1,11 @@
 package app
 
 import (
-	"freedom-sentry/config"
-	"freedom-sentry/mediawiki"
-	"freedom-sentry/suppressor"
 	"log"
+
+	"github.com/wizardist/freedom-sentry/config"
+	"github.com/wizardist/freedom-sentry/mediawiki"
+	"github.com/wizardist/freedom-sentry/suppressor"
 )
 
 type changeHandlerFunc func([]mediawiki.Revision) error

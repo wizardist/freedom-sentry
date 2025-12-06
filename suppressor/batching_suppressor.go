@@ -1,11 +1,12 @@
 package suppressor
 
 import (
-	"freedom-sentry/mediawiki"
-	"golang.org/x/exp/slices"
 	"log"
 	"sync"
 	"time"
+
+	"github.com/wizardist/freedom-sentry/mediawiki"
+	"golang.org/x/exp/slices"
 )
 
 type batchingSuppressor struct {

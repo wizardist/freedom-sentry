@@ -2,10 +2,11 @@ package suppressor
 
 import (
 	"errors"
-	"freedom-sentry/mediawiki"
 	"reflect"
 	"strings"
 	"testing"
+
+	"github.com/wizardist/freedom-sentry/mediawiki"
 )
 
 type mockApi struct {

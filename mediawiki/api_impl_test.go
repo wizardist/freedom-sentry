@@ -2,16 +2,17 @@ package mediawiki
 
 import (
 	"errors"
-	"freedom-sentry/config"
-	"freedom-sentry/util"
-	"golang.org/x/exp/maps"
-	"golang.org/x/exp/slices"
 	"io"
 	"io/ioutil"
 	"net/http"
 	"net/url"
 	"strings"
 	"testing"
+
+	"github.com/wizardist/freedom-sentry/config"
+	"github.com/wizardist/freedom-sentry/util"
+	"golang.org/x/exp/maps"
+	"golang.org/x/exp/slices"
 )
 
 type mockClient struct {

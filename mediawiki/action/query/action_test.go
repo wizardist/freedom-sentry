@@ -2,11 +2,12 @@ package query
 
 import (
 	"errors"
-	"freedom-sentry/mediawiki"
-	"freedom-sentry/util"
 	"reflect"
 	"testing"
 	"time"
+
+	"github.com/wizardist/freedom-sentry/mediawiki"
+	"github.com/wizardist/freedom-sentry/util"
 )
 
 func TestQuery_ToActionPayload(t *testing.T) {

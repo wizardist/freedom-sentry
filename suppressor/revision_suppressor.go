@@ -1,10 +1,11 @@
 package suppressor
 
 import (
-	"freedom-sentry/mediawiki"
-	"freedom-sentry/mediawiki/action/revisiondelete"
 	"log"
 	"time"
+
+	"github.com/wizardist/freedom-sentry/mediawiki"
+	"github.com/wizardist/freedom-sentry/mediawiki/action/revisiondelete"
 )
 
 type RevisionSuppressor interface {

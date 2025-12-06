@@ -1,10 +1,11 @@
 package revisiondelete
 
 import (
-	"freedom-sentry/mediawiki"
-	"freedom-sentry/util"
 	"reflect"
 	"testing"
+
+	"github.com/wizardist/freedom-sentry/mediawiki"
+	"github.com/wizardist/freedom-sentry/util"
 )
 
 func TestRevisionDelete_ToActionPayload(t *testing.T) {

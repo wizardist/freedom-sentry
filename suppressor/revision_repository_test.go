@@ -1,11 +1,12 @@
 package suppressor
 
 import (
-	"freedom-sentry/mediawiki"
-	"freedom-sentry/util"
 	"reflect"
 	"testing"
 	"time"
+
+	"github.com/wizardist/freedom-sentry/mediawiki"
+	"github.com/wizardist/freedom-sentry/util"
 )
 
 func Test_revRepoImpl_GetRecentChanges(t *testing.T) {

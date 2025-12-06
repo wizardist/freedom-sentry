@@ -2,7 +2,8 @@ package query
 
 import (
 	"errors"
-	"freedom-sentry/mediawiki"
+
+	"github.com/wizardist/freedom-sentry/mediawiki"
 )
 
 type RevisionsQueryProperty struct {

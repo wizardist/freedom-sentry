@@ -1,10 +1,11 @@
 package http
 
 import (
-	"golang.org/x/time/rate"
 	gohttp "net/http"
 	"net/url"
 	"time"
+
+	"golang.org/x/time/rate"
 )
 
 type Client interface {

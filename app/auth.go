@@ -1,9 +1,10 @@
 package app
 
 import (
-	"freedom-sentry/mediawiki"
-	"freedom-sentry/mediawiki/action/query"
 	"log"
+
+	"github.com/wizardist/freedom-sentry/mediawiki"
+	"github.com/wizardist/freedom-sentry/mediawiki/action/query"
 )
 
 func acquireCsrfTokenFn(api mediawiki.Api) (mediawiki.Token, error) {

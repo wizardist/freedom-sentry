@@ -1,6 +1,6 @@
 package revisiondelete
 
-import "freedom-sentry/mediawiki"
+import "github.com/wizardist/freedom-sentry/mediawiki"
 
 type Type string
 

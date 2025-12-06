@@ -1,10 +1,11 @@
 package app
 
 import (
-	"freedom-sentry/config"
-	"freedom-sentry/suppressor"
 	"log"
 	"time"
+
+	"github.com/wizardist/freedom-sentry/config"
+	"github.com/wizardist/freedom-sentry/suppressor"
 )
 
 func scheduleListSuppressor(pageRepo suppressor.SuppressedPageRepository, pageSuppressor suppressor.PageSuppressor) {

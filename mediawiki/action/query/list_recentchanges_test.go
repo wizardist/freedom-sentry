@@ -1,12 +1,13 @@
 package query
 
 import (
-	"freedom-sentry/mediawiki"
-	"freedom-sentry/util"
-	"golang.org/x/exp/slices"
 	"reflect"
 	"testing"
 	"time"
+
+	"github.com/wizardist/freedom-sentry/mediawiki"
+	"github.com/wizardist/freedom-sentry/util"
+	"golang.org/x/exp/slices"
 )
 
 func TestRecentChangesQueryList_ToListPayload(t *testing.T) {
