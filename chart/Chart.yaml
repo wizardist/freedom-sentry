@@ -1,0 +1,12 @@
+apiVersion: v2
+name: freedom-sentry-helm
+version: 0.1.0
+appVersion: "0.1.0"
+description: MediaWiki bot for Wikipedia to suppress edit metadata for sensitive articles
+type: application
+keywords:
+  - mediawiki
+  - wikipedia
+  - privacy
+maintainers:
+  - name: wizardist

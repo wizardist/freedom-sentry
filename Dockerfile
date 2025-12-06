@@ -2,8 +2,7 @@ FROM golang:1.25.4-alpine3.22 AS build
 
 WORKDIR /freedom-sentry
 
-ENV GO111MODULE=on \
-    CGO_ENABLED=0 \
+ENV CGO_ENABLED=0 \
     GOOS=linux \
     GOARCH=amd64
 
@@ -13,7 +12,7 @@ RUN go mod download
 
 COPY . .
 
-RUN go build -ldflags="-s -w" -o /freedom-sentry-exe freedom-sentry
+RUN go build -ldflags="-s -w" -o /freedom-sentry-exe .
 
 FROM scratch
 

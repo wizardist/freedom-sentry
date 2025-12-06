@@ -1,0 +1,70 @@
+# -- Single replica - stateless daemon
+replicaCount: 1
+
+image:
+  # -- Image repository (override in production values)
+  repository: REGISTRY_URL/freedom-sentry
+  pullPolicy: IfNotPresent
+  # -- Overrides the image tag whose default is the chart appVersion
+  tag: ""
+
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
+
+config:
+  # -- API endpoint for MediaWiki (required)
+  apiEndpoint: ""
+
+  # -- Name of the suppression list page (required)
+  listName: ""
+
+  # -- Skip initial full scan on startup
+  skipInitFullscan: false
+
+secret:
+  # -- Create a secret containing the access token
+  create: true
+  # -- Access token value (only used if create is true)
+  accessToken: ""
+  # -- Name of existing secret to use (if create is false).
+  # Secret must contain key 'accessToken'
+  existingSecret: ""
+
+serviceAccount:
+  # -- Specifies whether a service account should be created
+  create: true
+  # -- Annotations to add to the service account
+  annotations: {}
+  # -- The name of the service account to use
+  name: ""
+
+podAnnotations: {}
+podLabels: {}
+
+podSecurityContext:
+  runAsNonRoot: true
+  runAsUser: 65534
+  fsGroup: 65534
+
+securityContext:
+  allowPrivilegeEscalation: false
+  capabilities:
+    drop:
+    - ALL
+  readOnlyRootFilesystem: true
+
+resources:
+  limits:
+    cpu: 1
+    memory: 32Mi
+  requests:
+    cpu: 50m
+    memory: 16Mi
+
+nodeSelector: {}
+tolerations: []
+affinity: {}
+
+# Additional environment variables
+env: []
