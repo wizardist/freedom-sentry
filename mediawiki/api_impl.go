@@ -4,12 +4,13 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
-	"log"
+	"log/slog"
 	gohttp "net/http"
 	"net/url"
 	"os"
 	"reflect"
 	"strings"
+	"time"
 
 	"github.com/wizardist/freedom-sentry/config"
 	"github.com/wizardist/freedom-sentry/http"
@@ -38,11 +39,14 @@ func NewApi(endpoint string, client http.Client, tokenFn TokenRequestFn) Api {
 
 func (api *apiImpl) Execute(action Action) error {
 	payload := action.ToActionPayload()
+	actionType, _ := payload["action"].(string)
 
-	log.Println("executing action", payload)
+	slog.Debug("executing MediaWiki API action",
+		"action", actionType,
+		"payload", sanitizePayload(payload))
 
 	if action.IsWriteAction() {
-		log.Println("injecting token for a write action")
+		slog.Debug("injecting token for write action")
 		err := api.injectToken(payload)
 		if err != nil {
 			return err
@@ -54,8 +58,15 @@ func (api *apiImpl) Execute(action Action) error {
 		return err
 	}
 
+	start := time.Now()
 	resp, err := api.httpClient.Do(request)
+	duration := time.Since(start)
+
 	if err != nil {
+		slog.Error("MediaWiki API request failed",
+			"action", actionType,
+			"error", err,
+			"duration_ms", duration.Milliseconds())
 		return err
 	}
 	defer util.Close(resp.Body)
@@ -71,9 +82,27 @@ func (api *apiImpl) Execute(action Action) error {
 		return err
 	}
 
+	slog.Debug("MediaWiki API action completed",
+		"action", actionType,
+		"status", resp.StatusCode,
+		"duration_ms", duration.Milliseconds(),
+		"has_error", respJson["error"] != nil)
+
 	err = action.SetResponse(respJson)
 
 	return err
+}
+
+func sanitizePayload(payload map[string]interface{}) map[string]interface{} {
+	sanitized := make(map[string]interface{})
+	for k, v := range payload {
+		if k == "token" {
+			sanitized[k] = "[REDACTED]"
+		} else {
+			sanitized[k] = v
+		}
+	}
+	return sanitized
 }
 
 func (api *apiImpl) createRequest(payload map[string]interface{}) (*gohttp.Request, error) {

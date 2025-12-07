@@ -1,7 +1,7 @@
 package app
 
 import (
-	"log"
+	"log/slog"
 
 	"github.com/wizardist/freedom-sentry/mediawiki"
 	"github.com/wizardist/freedom-sentry/mediawiki/action/query"
@@ -15,17 +15,17 @@ func acquireCsrfTokenFn(api mediawiki.Api) (mediawiki.Token, error) {
 		Meta: []query.Meta{tokensQm},
 	}
 
-	log.Println("requesting a new CSRF token")
+	slog.Debug("requesting CSRF token")
 
 	err := api.Execute(a)
 	if err != nil {
-		log.Println("failed to retrieve a CSRF token:", err)
+		slog.Error("failed to retrieve CSRF token", "error", err)
 		return "", err
 	}
 
 	csrfToken := tokensQm.GetTokens().Csrf
 
-	log.Println("acquired a new CSRF token:", csrfToken)
+	slog.Debug("acquired CSRF token")
 
 	return mediawiki.Token(csrfToken), nil
 }

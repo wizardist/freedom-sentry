@@ -1,7 +1,7 @@
 package app
 
 import (
-	"log"
+	"log/slog"
 	"time"
 
 	"github.com/wizardist/freedom-sentry/config"
@@ -19,14 +19,14 @@ func scheduleListSuppressor(pageRepo suppressor.SuppressedPageRepository, pageSu
 }
 
 func suppressList(pageRepo suppressor.SuppressedPageRepository, pageSuppressor suppressor.PageSuppressor) {
-	log.Println("running a new suppression job")
+	slog.Info("running scheduled suppression job")
 
 	suppressedPages, err := pageRepo.GetAll()
-	log.Println("found suppressed pages", suppressedPages)
+	slog.Info("found suppressed pages", "count", len(suppressedPages), "pages", suppressedPages)
 	for _, pageName := range suppressedPages {
 		err = pageSuppressor.SuppressPageByName(pageName)
 		if err != nil {
-			log.Printf("failed to suppress [%s] revisions: %v", pageName, err)
+			slog.Error("failed to suppress page revisions", "page", pageName, "error", err)
 		}
 	}
 }

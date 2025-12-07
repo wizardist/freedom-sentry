@@ -1,7 +1,7 @@
 package app
 
 import (
-	"log"
+	"log/slog"
 
 	"github.com/wizardist/freedom-sentry/config"
 	"github.com/wizardist/freedom-sentry/mediawiki"
@@ -31,7 +31,7 @@ func createHandlerChangeForSuppressor(pageRepo suppressor.SuppressedPageReposito
 	return func(changes []mediawiki.Revision) error {
 		list, err := pageRepo.GetAll()
 		if err != nil {
-			log.Println("failed to get suppression list:", err)
+			slog.Error("failed to get suppression list", "error", err)
 			return err
 		}
 
@@ -49,9 +49,14 @@ func createHandlerChangeForSuppressor(pageRepo suppressor.SuppressedPageReposito
 			revs = append(revs, rev)
 		}
 
+		slog.Debug("processing revisions for suppression",
+			"total_changes", len(changes),
+			"list_size", len(list),
+			"matching_revisions", len(revs))
+
 		err = revSuppressor.SuppressRevisions(revs)
 		if err != nil {
-			log.Println("failed to suppress revisions", revs)
+			slog.Error("failed to suppress revisions", "error", err, "revision_count", len(revs))
 			return err
 		}
 

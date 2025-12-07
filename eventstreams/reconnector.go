@@ -50,6 +50,7 @@ func (r *Reconnector) Run(ctx context.Context, since *time.Time, eventHandler fu
 	for {
 		select {
 		case <-ctx.Done():
+			slog.Info("EventStreams shutting down", "reason", "context_cancelled")
 			return ctx.Err()
 		default:
 		}
@@ -72,6 +73,7 @@ func (r *Reconnector) Run(ctx context.Context, since *time.Time, eventHandler fu
 
 		// Connection successful, reset attempt counter
 		attempt = 0
+		slog.Info("EventStreams connected successfully")
 
 		// After first successful connection, don't use 'since' parameter on reconnect
 		// Instead, rely on checkpoint-based resume

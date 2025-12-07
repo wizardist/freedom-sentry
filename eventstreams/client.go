@@ -65,6 +65,8 @@ func (c *Client) Connect(ctx context.Context, since *time.Time) (*EventStream, e
 		url = fmt.Sprintf("%s?since=%s", url, since.UTC().Format(time.RFC3339))
 	}
 
+	slog.Debug("establishing EventStreams connection", "url", url, "since", since)
+
 	req, err := http.NewRequestWithContext(ctx, "GET", url, nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create request: %w", err)
@@ -147,6 +149,10 @@ func (c *Client) readEvents(ctx context.Context, body io.ReadCloser, stream *Eve
 					Data: json.RawMessage(data),
 				}
 
+				slog.Debug("EventStreams event received",
+					"event_id", eventID,
+					"data_size", len(data))
+
 				// Update checkpoint after receiving event (before sending to channel)
 				if eventID != "" {
 					c.updateCheckpoint(eventID)
@@ -218,5 +224,6 @@ func (s *EventStream) Done() <-chan struct{} {
 
 // Close terminates the SSE connection
 func (s *EventStream) Close() {
+	slog.Debug("closing EventStreams connection")
 	s.cancel()
 }

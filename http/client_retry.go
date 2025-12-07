@@ -1,7 +1,7 @@
 package http
 
 import (
-	"log"
+	"log/slog"
 	"net/http"
 )
 
@@ -20,6 +20,10 @@ func (c *retryClient) Do(req *http.Request) (*http.Response, error) {
 	for attempts > 0 {
 		resp, err = c.client.Do(req)
 		if err == nil {
+			slog.Debug("HTTP request successful",
+				"method", req.Method,
+				"url", req.URL.String(),
+				"status", resp.StatusCode)
 			return resp, nil
 		}
 
@@ -30,7 +34,13 @@ func (c *retryClient) Do(req *http.Request) (*http.Response, error) {
 		sleepTime := 2 ^ (maxAttempts - attempts)
 		attempts--
 
-		log.Printf("failed attempt %d to request %s %s, waiting %d s", maxAttempts-attempts, req.Method, req.URL, sleepTime)
+		slog.Warn("HTTP request attempt failed, retrying",
+			"method", req.Method,
+			"url", req.URL.String(),
+			"attempt", maxAttempts-attempts,
+			"max_attempts", maxAttempts,
+			"backoff_seconds", sleepTime,
+			"error", err)
 	}
 
 	return resp, err

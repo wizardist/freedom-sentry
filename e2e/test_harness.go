@@ -20,8 +20,9 @@ type BotProcess struct {
 func StartBot(t *testing.T, backend Backend) *BotProcess {
 	t.Helper()
 
-	// Build binary (Go caches compilation for fast rebuilds)
-	binPath := filepath.Join("bin", "freedom-sentry-test")
+	// Build binary in a temporary directory
+	tempDir := t.TempDir()
+	binPath := filepath.Join(tempDir, "freedom-sentry-test")
 	buildCmd := exec.Command("go", "build", "-o", binPath, ".")
 	buildCmd.Dir = getRepoRoot()
 	if err := buildCmd.Run(); err != nil {
@@ -30,13 +31,14 @@ func StartBot(t *testing.T, backend Backend) *BotProcess {
 
 	// Prepare environment with backend endpoints
 	ctx, cancel := context.WithCancel(context.Background())
-	cmd := exec.CommandContext(ctx, filepath.Join(getRepoRoot(), binPath))
+	cmd := exec.CommandContext(ctx, binPath)
 	cmd.Env = append(os.Environ(),
 		"API_ENDPOINT="+backend.APIEndpoint(),
 		"EVENTSTREAMS_URL="+backend.EventStreamsEndpoint(),
 		"WIKI_DOMAIN="+backend.WikiDomain(),
 		"LIST_NAME="+backend.ListPageName(),
 		"ACCESS_TOKEN=test-token",
+		"LOG_LEVEL=DEBUG",
 	)
 
 	// Capture output for debugging

@@ -1,7 +1,7 @@
 package suppressor
 
 import (
-	"log"
+	"log/slog"
 )
 
 type PageSuppressor interface {
@@ -21,12 +21,14 @@ type pageSuppressorImpl struct {
 }
 
 func (ps pageSuppressorImpl) SuppressPageByName(name string) error {
-	log.Println("retrieving revisions for page:", name)
+	slog.Debug("retrieving page revisions", "page", name)
 	revs, err := ps.revRepo.GetAllByPageName(name)
 	if err != nil {
-		log.Println("failed to retrieve revisions for page:", err)
+		slog.Error("failed to retrieve page revisions", "page", name, "error", err)
 		return err
 	}
+
+	slog.Info("retrieved page revisions", "page", name, "count", len(revs))
 
 	err = ps.revSuppressor.SuppressRevisions(revs)
 

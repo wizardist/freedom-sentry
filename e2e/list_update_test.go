@@ -47,9 +47,6 @@ func TestListUpdateDetection(t *testing.T) {
 	bot := StartBot(t, backend)
 	defer bot.Stop()
 
-	// Wait for bot to fully initialize and connect to EventStreams
-	WaitForReady(2 * time.Second)
-
 	// Emit edit to unlisted page (should NOT be suppressed)
 	edit1 := Edit{
 		Title:     "Eurasian Lynx",
@@ -80,9 +77,6 @@ func TestListUpdateDetection(t *testing.T) {
 		Namespace: 4, // Wikipedia namespace
 	}
 	backend.EmitEdit(listEdit)
-
-	// Wait for bot to detect and process list update
-	time.Sleep(2 * time.Second)
 
 	// Emit another edit to Eurasian Lynx (should NOW be suppressed)
 	edit2 := Edit{

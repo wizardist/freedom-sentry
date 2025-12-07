@@ -1,7 +1,7 @@
 package suppressor
 
 import (
-	"log"
+	"log/slog"
 	"time"
 
 	"github.com/wizardist/freedom-sentry/mediawiki"
@@ -18,7 +18,7 @@ type revisionSuppressorImpl struct {
 
 func (rs revisionSuppressorImpl) SuppressRevisions(revs []mediawiki.Revision) error {
 	if len(revs) == 0 {
-		log.Println("nothing to suppress")
+		slog.Debug("no revisions to suppress")
 		return nil
 	}
 
@@ -28,7 +28,10 @@ func (rs revisionSuppressorImpl) SuppressRevisions(revs []mediawiki.Revision) er
 		ids = append(ids, rev.Id)
 	}
 
-	log.Printf("suppressing %d revisions", len(ids))
+	slog.Info("suppressing revisions", "count", len(ids))
+	slog.Debug("preparing revision suppression",
+		"revision_ids", ids,
+		"hide_details", []string{"user", "comment"})
 
 	return rs.api.Execute(getActionForRevisions(ids))
 }

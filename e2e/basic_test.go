@@ -121,9 +121,6 @@ func TestBasicSuppression(t *testing.T) {
 			bot := StartBot(t, backend)
 			defer bot.Stop()
 
-			// Wait for bot to fully initialize and connect to EventStreams
-			// WaitForReady(2 * time.Second)
-
 			// Emit edit
 			if err := backend.EmitEdit(tt.editToEmit); err != nil {
 				t.Fatalf("Failed to emit edit: %v", err)

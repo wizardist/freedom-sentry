@@ -1,7 +1,7 @@
 package suppressor
 
 import (
-	"log"
+	"log/slog"
 	"sync"
 	"time"
 
@@ -34,6 +34,10 @@ func (b *batchingSuppressor) SuppressRevisions(revs []mediawiki.Revision) error 
 		for _, rev := range revs {
 			b.buffer = append(b.buffer, rev)
 		}
+		slog.Debug("revisions added to batch buffer",
+			"added", len(revs),
+			"buffer_size", len(b.buffer),
+			"batch_size", b.size)
 	})
 
 	b.drainRequest <- true
@@ -46,6 +50,7 @@ func (b *batchingSuppressor) drainBuffer() error {
 
 	if len(b.buffer) >= b.size {
 		batch, b.buffer = b.buffer[:b.size], b.buffer[b.size:]
+		slog.Debug("draining batch buffer", "batch_size", len(batch))
 		return b.suppressor.SuppressRevisions(batch)
 	}
 
@@ -65,6 +70,10 @@ func (b *batchingSuppressor) forceDrainBuffer() error {
 	if len(batch) == 0 {
 		return nil
 	}
+
+	slog.Debug("force draining batch buffer",
+		"batch_size", len(batch),
+		"remaining", len(b.buffer))
 
 	return b.suppressor.SuppressRevisions(batch)
 }
@@ -116,6 +125,6 @@ func withLockErr(lk sync.Locker, fn func() error) {
 
 	err := fn()
 	if err != nil {
-		log.Println(err)
+		slog.Error("batch operation failed", "error", err)
 	}
 }

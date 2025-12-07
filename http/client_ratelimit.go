@@ -2,7 +2,7 @@ package http
 
 import (
 	"context"
-	"log"
+	"log/slog"
 	"net/http"
 	"time"
 
@@ -18,7 +18,10 @@ func (c *ratelimitClient) Do(req *http.Request) (*http.Response, error) {
 	ctx := context.Background()
 	err := c.limiter.Wait(ctx)
 	if err != nil {
-		log.Printf("failed to rate limit during %s %s", req.Method, req.URL.String())
+		slog.Error("rate limiter wait failed",
+			"method", req.Method,
+			"url", req.URL.String(),
+			"error", err)
 	}
 
 	resp, err := c.client.Do(req)
@@ -27,9 +30,19 @@ func (c *ratelimitClient) Do(req *http.Request) (*http.Response, error) {
 	}
 
 	if resp != nil && (resp.StatusCode == http.StatusTooManyRequests || isRateLimited(resp)) {
+		slog.Warn("rate limited by server, backing off",
+			"method", req.Method,
+			"url", req.URL.String(),
+			"status", resp.StatusCode,
+			"backoff_seconds", 3)
 		reservation := c.limiter.ReserveN(time.Now().Add(3*time.Second), c.limiter.Burst())
 		time.Sleep(reservation.Delay())
 	}
+
+	slog.Debug("HTTP request executed",
+		"method", req.Method,
+		"url", req.URL.String(),
+		"status", resp.StatusCode)
 
 	return resp, nil
 }

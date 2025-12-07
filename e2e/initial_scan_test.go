@@ -43,10 +43,6 @@ func TestInitialFullScan(t *testing.T) {
 	bot := StartBot(t, backend)
 	defer bot.Stop()
 
-	// Wait for initial scan to complete
-	// Initial scan runs on startup and processes all revisions on listed pages
-	time.Sleep(5 * time.Second)
-
 	// Verify both existing revisions are suppressed
 	backend.AssertRevisionSuppressed(t, 1001, 10*time.Second)
 	backend.AssertRevisionSuppressed(t, 1002, 10*time.Second)

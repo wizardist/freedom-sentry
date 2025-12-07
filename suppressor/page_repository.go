@@ -1,7 +1,7 @@
 package suppressor
 
 import (
-	"log"
+	"log/slog"
 	"strings"
 	"time"
 )
@@ -40,11 +40,16 @@ type suppressedPageRepoImpl struct {
 func (p suppressedPageRepoImpl) GetAll() ([]string, error) {
 	suppressedPagesStr, err := p.revRepo.GetLatestPageContent(p.listName)
 	if err != nil {
-		log.Println("failed to retrieve the list of suppressed pages")
+		slog.Error("failed to retrieve suppression list", "list_name", p.listName, "error", err)
 		return nil, err
 	}
 
+	lines := strings.Split(suppressedPagesStr, "\n")
 	suppressedPages := rawPageListToSlice(suppressedPagesStr)
+	slog.Debug("parsed suppression list",
+		"list_name", p.listName,
+		"total_lines", len(lines),
+		"valid_pages", len(suppressedPages))
 	return suppressedPages, nil
 }
 
@@ -75,6 +80,7 @@ type cachingSuppressedPageRepoImpl struct {
 
 func (c *cachingSuppressedPageRepoImpl) GetAll() ([]string, error) {
 	if !c.timestamp.IsZero() || time.Now().Sub(c.timestamp) < 24*time.Hour {
+		slog.Debug("using cached suppression list", "count", len(c.list))
 		return c.list, nil
 	}
 
@@ -86,6 +92,7 @@ func (c *cachingSuppressedPageRepoImpl) GetAll() ([]string, error) {
 
 	c.list = list
 	c.timestamp = time.Now()
+	slog.Info("refreshed suppression list cache", "count", len(list))
 
 	return list, nil
 }

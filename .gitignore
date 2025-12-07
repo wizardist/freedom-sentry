@@ -3,3 +3,6 @@
 
 .env
 dist/
+
+# Claude Code
+settings.local.json
