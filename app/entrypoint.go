@@ -53,7 +53,7 @@ func (App) Run() {
 	done := make(chan bool)
 
 	go scheduleListSuppressor(pageRepo, pageSuppressor)
-	go scheduleRecentChangeSuppressor(pageRepo, revSuppressor, listUpdatedChan, revRepo)
+	go scheduleRecentChangeSuppressor(pageRepo, revSuppressor, listUpdatedChan)
 
 	<-done
 }
