@@ -18,5 +18,14 @@ type Revision struct {
 }
 
 func RevisionIdFromAny(v interface{}) RevisionId {
-	return RevisionId(fmt.Sprintf("%.f", v))
+	switch val := v.(type) {
+	case int64:
+		return RevisionId(fmt.Sprintf("%d", val))
+	case int:
+		return RevisionId(fmt.Sprintf("%d", val))
+	case float64:
+		return RevisionId(fmt.Sprintf("%.f", val))
+	default:
+		return RevisionId(fmt.Sprintf("%v", val))
+	}
 }
