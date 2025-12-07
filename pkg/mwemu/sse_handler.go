@@ -49,6 +49,9 @@ func (e *Emulator) handleSSE(w http.ResponseWriter, r *http.Request) {
 			}
 
 			// Write SSE event
+			if event.Event != "" {
+				fmt.Fprintf(w, "event: %s\n", event.Event)
+			}
 			if event.ID != "" {
 				fmt.Fprintf(w, "id: %s\n", event.ID)
 			}

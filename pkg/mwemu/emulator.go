@@ -30,8 +30,9 @@ type Emulator struct {
 
 // sseEvent represents an event to be sent over SSE
 type sseEvent struct {
-	ID   string
-	Data string
+	Event string
+	ID    string
+	Data  string
 }
 
 // New creates a new MediaWiki emulator for testing
@@ -149,8 +150,8 @@ func (e *Emulator) EmitEdit(edit Edit) {
 		"bot":         edit.Bot,
 		"timestamp":   edit.Timestamp.Unix(),
 		"revision": map[string]interface{}{
-			"rev_id":     edit.RevID,
-			"old_rev_id": edit.OldRevID,
+			"new": edit.RevID,
+			"old": edit.OldRevID,
 		},
 		"meta": map[string]interface{}{
 			"dt": edit.Timestamp.UTC().Format("2006-01-02T15:04:05Z"),
@@ -168,6 +169,7 @@ func (e *Emulator) EmitEdit(edit Edit) {
 			"topic":     "test.recentchange",
 			"partition": 0,
 			"offset":    seq,
+			"timestamp": edit.Timestamp.UnixMilli(),
 		},
 	}
 	checkpointJSON, err := json.Marshal(checkpoint)
@@ -177,8 +179,9 @@ func (e *Emulator) EmitEdit(edit Edit) {
 
 	// Create SSE event
 	event := sseEvent{
-		ID:   string(checkpointJSON),
-		Data: string(dataJSON),
+		Event: "message",
+		ID:    string(checkpointJSON),
+		Data:  string(dataJSON),
 	}
 
 	// Broadcast to all connected clients

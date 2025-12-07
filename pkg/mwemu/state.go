@@ -123,14 +123,14 @@ func (s *State) GetRecentChanges(start string, limitStr string) []interface{} {
 		}
 
 		entry := map[string]interface{}{
-			"type":       rc.Type,
-			"ns":         rc.Namespace,
-			"title":      rc.Title,
-			"pageid":     rc.PageID,
-			"revid":      rc.RevID,
-			"old_revid":  rc.OldRevID,
-			"user":       rc.User,
-			"timestamp":  rc.Timestamp.UTC().Format("2006-01-02T15:04:05Z"),
+			"type":      rc.Type,
+			"ns":        rc.Namespace,
+			"title":     rc.Title,
+			"pageid":    rc.PageID,
+			"revid":     rc.RevID,
+			"old_revid": rc.OldRevID,
+			"user":      rc.User,
+			"timestamp": rc.Timestamp.UTC().Format("2006-01-02T15:04:05Z"),
 		}
 
 		result = append(result, entry)

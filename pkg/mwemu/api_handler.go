@@ -319,7 +319,7 @@ func (e *Emulator) handleRevisionDelete(w http.ResponseWriter, r *http.Request) 
 			"status": "Success",
 			"items": []map[string]interface{}{
 				{
-					"id":     ids,
+					"id":            ids,
 					"userhidden":    true,
 					"commenthidden": true,
 				},

@@ -25,8 +25,8 @@ func TestParseRecentChange(t *testing.T) {
 				"bot": false,
 				"timestamp": 1670000000,
 				"revision": {
-					"rev_id": 123456,
-					"old_rev_id": 123455
+					"new": 123456,
+					"old": 123455
 				},
 				"meta": {
 					"dt": "2022-12-02T20:53:20Z"
@@ -41,11 +41,11 @@ func TestParseRecentChange(t *testing.T) {
 				Bot:        false,
 				Timestamp:  1670000000,
 				Revision: struct {
-					RevID    int64 `json:"rev_id"`
-					OldRevID int64 `json:"old_rev_id"`
+					New int64 `json:"new"`
+					Old int64 `json:"old"`
 				}{
-					RevID:    123456,
-					OldRevID: 123455,
+					New: 123456,
+					Old: 123455,
 				},
 				Meta: struct {
 					Dt string `json:"dt"`
@@ -57,7 +57,7 @@ func TestParseRecentChange(t *testing.T) {
 		},
 		{
 			name:  "Valid bot edit",
-			input: []byte(`{"server_name":"en.wikipedia.org","type":"edit","namespace":0,"title":"Page","user":"BotUser","bot":true,"timestamp":1670000000,"revision":{"rev_id":100,"old_rev_id":99},"meta":{"dt":"2022-12-02T20:53:20Z"}}`),
+			input: []byte(`{"server_name":"en.wikipedia.org","type":"edit","namespace":0,"title":"Page","user":"BotUser","bot":true,"timestamp":1670000000,"revision":{"new":100,"old":99},"meta":{"dt":"2022-12-02T20:53:20Z"}}`),
 			want: &RecentChangeEvent{
 				ServerName: "en.wikipedia.org",
 				Type:       "edit",
@@ -71,7 +71,7 @@ func TestParseRecentChange(t *testing.T) {
 		},
 		{
 			name:  "Log event",
-			input: []byte(`{"server_name":"en.wikipedia.org","type":"log","namespace":0,"title":"Page","user":"Admin","bot":false,"timestamp":1670000000,"revision":{"rev_id":0,"old_rev_id":0},"meta":{"dt":"2022-12-02T20:53:20Z"}}`),
+			input: []byte(`{"server_name":"en.wikipedia.org","type":"log","namespace":0,"title":"Page","user":"Admin","bot":false,"timestamp":1670000000,"revision":{"new":0,"old":0},"meta":{"dt":"2022-12-02T20:53:20Z"}}`),
 			want: &RecentChangeEvent{
 				ServerName: "en.wikipedia.org",
 				Type:       "log",
@@ -85,7 +85,7 @@ func TestParseRecentChange(t *testing.T) {
 		},
 		{
 			name:  "New page event",
-			input: []byte(`{"server_name":"en.wikipedia.org","type":"new","namespace":0,"title":"New Page","user":"Creator","bot":false,"timestamp":1670000000,"revision":{"rev_id":1,"old_rev_id":0},"meta":{"dt":"2022-12-02T20:53:20Z"}}`),
+			input: []byte(`{"server_name":"en.wikipedia.org","type":"new","namespace":0,"title":"New Page","user":"Creator","bot":false,"timestamp":1670000000,"revision":{"new":1,"old":0},"meta":{"dt":"2022-12-02T20:53:20Z"}}`),
 			want: &RecentChangeEvent{
 				ServerName: "en.wikipedia.org",
 				Type:       "new",
@@ -99,7 +99,7 @@ func TestParseRecentChange(t *testing.T) {
 		},
 		{
 			name:  "Categorize event",
-			input: []byte(`{"server_name":"en.wikipedia.org","type":"categorize","namespace":14,"title":"Category:Test","user":"User","bot":false,"timestamp":1670000000,"revision":{"rev_id":0,"old_rev_id":0},"meta":{"dt":"2022-12-02T20:53:20Z"}}`),
+			input: []byte(`{"server_name":"en.wikipedia.org","type":"categorize","namespace":14,"title":"Category:Test","user":"User","bot":false,"timestamp":1670000000,"revision":{"new":0,"old":0},"meta":{"dt":"2022-12-02T20:53:20Z"}}`),
 			want: &RecentChangeEvent{
 				ServerName: "en.wikipedia.org",
 				Type:       "categorize",
@@ -113,7 +113,7 @@ func TestParseRecentChange(t *testing.T) {
 		},
 		{
 			name:  "Unicode in title and user",
-			input: []byte(`{"server_name":"ja.wikipedia.org","type":"edit","namespace":0,"title":"日本語","user":"ユーザー","bot":false,"timestamp":1670000000,"revision":{"rev_id":999,"old_rev_id":998},"meta":{"dt":"2022-12-02T20:53:20Z"}}`),
+			input: []byte(`{"server_name":"ja.wikipedia.org","type":"edit","namespace":0,"title":"日本語","user":"ユーザー","bot":false,"timestamp":1670000000,"revision":{"new":999,"old":998},"meta":{"dt":"2022-12-02T20:53:20Z"}}`),
 			want: &RecentChangeEvent{
 				ServerName: "ja.wikipedia.org",
 				Type:       "edit",
@@ -127,7 +127,7 @@ func TestParseRecentChange(t *testing.T) {
 		},
 		{
 			name:  "Large revision IDs",
-			input: []byte(`{"server_name":"en.wikipedia.org","type":"edit","namespace":0,"title":"Page","user":"User","bot":false,"timestamp":1670000000,"revision":{"rev_id":9223372036854775807,"old_rev_id":9223372036854775806},"meta":{"dt":"2022-12-02T20:53:20Z"}}`),
+			input: []byte(`{"server_name":"en.wikipedia.org","type":"edit","namespace":0,"title":"Page","user":"User","bot":false,"timestamp":1670000000,"revision":{"new":9223372036854775807,"old":9223372036854775806},"meta":{"dt":"2022-12-02T20:53:20Z"}}`),
 			want: &RecentChangeEvent{
 				ServerName: "en.wikipedia.org",
 				Type:       "edit",
@@ -141,7 +141,7 @@ func TestParseRecentChange(t *testing.T) {
 		},
 		{
 			name:  "Zero revision IDs",
-			input: []byte(`{"server_name":"en.wikipedia.org","type":"edit","namespace":0,"title":"Page","user":"User","bot":false,"timestamp":1670000000,"revision":{"rev_id":0,"old_rev_id":0},"meta":{"dt":"2022-12-02T20:53:20Z"}}`),
+			input: []byte(`{"server_name":"en.wikipedia.org","type":"edit","namespace":0,"title":"Page","user":"User","bot":false,"timestamp":1670000000,"revision":{"new":0,"old":0},"meta":{"dt":"2022-12-02T20:53:20Z"}}`),
 			want: &RecentChangeEvent{
 				ServerName: "en.wikipedia.org",
 				Type:       "edit",
@@ -220,9 +220,9 @@ func TestRecentChangeEvent_ToRevision(t *testing.T) {
 				Title:     "Test Page",
 				Timestamp: 1670000000,
 				Revision: struct {
-					RevID    int64 `json:"rev_id"`
-					OldRevID int64 `json:"old_rev_id"`
-				}{RevID: 123},
+					New int64 `json:"new"`
+					Old int64 `json:"old"`
+				}{New: 123},
 			},
 			want: mediawiki.Revision{
 				Id:           mediawiki.RevisionId("123"),
@@ -239,9 +239,9 @@ func TestRecentChangeEvent_ToRevision(t *testing.T) {
 				Title:     "Test Page",
 				Timestamp: 0,
 				Revision: struct {
-					RevID    int64 `json:"rev_id"`
-					OldRevID int64 `json:"old_rev_id"`
-				}{RevID: 456},
+					New int64 `json:"new"`
+					Old int64 `json:"old"`
+				}{New: 456},
 				Meta: struct {
 					Dt string `json:"dt"`
 				}{Dt: "2022-12-02T20:53:20Z"},
@@ -261,9 +261,9 @@ func TestRecentChangeEvent_ToRevision(t *testing.T) {
 				Title:     "Test Page",
 				Timestamp: 1670000000,
 				Revision: struct {
-					RevID    int64 `json:"rev_id"`
-					OldRevID int64 `json:"old_rev_id"`
-				}{RevID: 789},
+					New int64 `json:"new"`
+					Old int64 `json:"old"`
+				}{New: 789},
 				Meta: struct {
 					Dt string `json:"dt"`
 				}{Dt: "2099-01-01T00:00:00Z"},
@@ -283,9 +283,9 @@ func TestRecentChangeEvent_ToRevision(t *testing.T) {
 				Title:     "Test Page",
 				Timestamp: 0,
 				Revision: struct {
-					RevID    int64 `json:"rev_id"`
-					OldRevID int64 `json:"old_rev_id"`
-				}{RevID: 999},
+					New int64 `json:"new"`
+					Old int64 `json:"old"`
+				}{New: 999},
 				Meta: struct {
 					Dt string `json:"dt"`
 				}{Dt: "invalid-timestamp"},
@@ -298,9 +298,9 @@ func TestRecentChangeEvent_ToRevision(t *testing.T) {
 				Title:     "Test Page",
 				Timestamp: 0,
 				Revision: struct {
-					RevID    int64 `json:"rev_id"`
-					OldRevID int64 `json:"old_rev_id"`
-				}{RevID: 111},
+					New int64 `json:"new"`
+					Old int64 `json:"old"`
+				}{New: 111},
 			},
 			want: mediawiki.Revision{
 				Id:           mediawiki.RevisionId("111"),
@@ -317,9 +317,9 @@ func TestRecentChangeEvent_ToRevision(t *testing.T) {
 				Title:     "Suppressed Page",
 				Timestamp: 1670000000,
 				Revision: struct {
-					RevID    int64 `json:"rev_id"`
-					OldRevID int64 `json:"old_rev_id"`
-				}{RevID: 222},
+					New int64 `json:"new"`
+					Old int64 `json:"old"`
+				}{New: 222},
 			},
 			want: mediawiki.Revision{
 				Id:           mediawiki.RevisionId("222"),
@@ -336,9 +336,9 @@ func TestRecentChangeEvent_ToRevision(t *testing.T) {
 				Title:     "Test Page",
 				Timestamp: 1670000000,
 				Revision: struct {
-					RevID    int64 `json:"rev_id"`
-					OldRevID int64 `json:"old_rev_id"`
-				}{RevID: 333},
+					New int64 `json:"new"`
+					Old int64 `json:"old"`
+				}{New: 333},
 			},
 			want: mediawiki.Revision{
 				Id:           mediawiki.RevisionId("333"),

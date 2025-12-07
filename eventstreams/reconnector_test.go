@@ -123,7 +123,7 @@ func TestReconnector_calculateBackoff(t *testing.T) {
 				Factor:  2.0,
 				Jitter:  0.25,
 			},
-			attempt:  10, // Would be 1024s without cap
+			attempt:  10,                       // Would be 1024s without cap
 			wantMin:  7500 * time.Millisecond,  // 10s - 25%
 			wantMax:  12500 * time.Millisecond, // 10s + 25%
 			checkCap: true,

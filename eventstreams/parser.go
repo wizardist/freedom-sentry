@@ -18,8 +18,8 @@ type RecentChangeEvent struct {
 	Bot        bool   `json:"bot"`
 	Timestamp  int64  `json:"timestamp"`
 	Revision   struct {
-		RevID    int64 `json:"rev_id"`
-		OldRevID int64 `json:"old_rev_id"`
+		New int64 `json:"new"`
+		Old int64 `json:"old"`
 	} `json:"revision"`
 	Meta struct {
 		Dt string `json:"dt"` // ISO8601 timestamp
@@ -51,7 +51,7 @@ func (e *RecentChangeEvent) ToRevision() (mediawiki.Revision, error) {
 	}
 
 	return mediawiki.Revision{
-		Id:           mediawiki.RevisionIdFromAny(e.Revision.RevID),
+		Id:           mediawiki.RevisionIdFromAny(e.Revision.New),
 		IsSuppressed: false, // EventStreams doesn't include suppressed revisions
 		Title:        e.Title,
 		Content:      "", // Not available in recent changes stream
