@@ -22,6 +22,7 @@ func suppressList(pageRepo suppressor.SuppressedPageRepository, pageSuppressor s
 	log.Println("running a new suppression job")
 
 	suppressedPages, err := pageRepo.GetAll()
+	log.Println("found suppressed pages", suppressedPages)
 	for _, pageName := range suppressedPages {
 		err = pageSuppressor.SuppressPageByName(pageName)
 		if err != nil {

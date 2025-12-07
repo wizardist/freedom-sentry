@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
+	"strings"
 	"sync"
 	"testing"
 	"time"
@@ -68,11 +69,22 @@ func New(t *testing.T, config Config) *Emulator {
 		emu.state.Pages = make(map[string]*Page)
 	}
 	if _, exists := emu.state.Pages[config.ListPageName]; !exists {
+		// Create initial revision with suppression list content
+		initialContent := strings.Join(config.InitialList, "\n")
 		emu.state.Pages[config.ListPageName] = &Page{
 			Title:     config.ListPageName,
 			Namespace: 4, // Wikipedia namespace
 			PageID:    1,
-			Revisions: []*Revision{},
+			Revisions: []*Revision{
+				{
+					RevID:     1,
+					ParentID:  0,
+					User:      "System",
+					Timestamp: time.Now(),
+					Comment:   "Initial suppression list",
+					Content:   initialContent,
+				},
+			},
 		}
 	}
 
