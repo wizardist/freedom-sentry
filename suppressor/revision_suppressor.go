@@ -2,8 +2,8 @@ package suppressor
 
 import (
 	"log/slog"
-	"time"
 
+	"github.com/wizardist/freedom-sentry/config"
 	"github.com/wizardist/freedom-sentry/mediawiki"
 	"github.com/wizardist/freedom-sentry/mediawiki/action/revisiondelete"
 )
@@ -48,7 +48,7 @@ func getActionForRevisions(revs []mediawiki.RevisionId) revisiondelete.RevisionD
 func NewRevisionSuppressor(api mediawiki.Api) RevisionSuppressor {
 	return &filteringRevisionSuppressor{
 		suppressor: &batchingSuppressor{
-			period: 5 * time.Second,
+			period: config.GetBatchingSuppressorPeriod(),
 			size:   500,
 			suppressor: &revisionSuppressorImpl{
 				api: api,

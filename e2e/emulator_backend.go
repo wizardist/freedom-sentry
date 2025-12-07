@@ -97,6 +97,14 @@ func (e *emulatorBackend) AssertRevisionNotSuppressed(t *testing.T, revID int64,
 	t.Errorf("Revision %d was suppressed, but expected not suppressed", revID)
 }
 
+func (e *emulatorBackend) AssertSuppressionBatchCount(t *testing.T, expectedCount int) {
+	t.Helper()
+	history := e.emu.GetState().GetSuppressionHistory()
+	if len(history) != expectedCount {
+		t.Errorf("Expected %d suppression batches, but found %d", expectedCount, len(history))
+	}
+}
+
 func (e *emulatorBackend) UpdateSuppressionList(pages []string) error {
 	state := e.emu.GetState()
 	state.UpdateSuppressionList(pages)

@@ -173,6 +173,20 @@ func (s *State) GetAPICallHistory() []APICall {
 	return history
 }
 
+// GetSuppressionHistory returns a list of suppression API calls
+func (s *State) GetSuppressionHistory() []APICall {
+	s.mu.RLock()
+	defer s.mu.RUnlock()
+
+	var suppressionCalls []APICall
+	for _, call := range s.APICallHistory {
+		if call.Action == "revisiondelete" {
+			suppressionCalls = append(suppressionCalls, call)
+		}
+	}
+	return suppressionCalls
+}
+
 // GetSuppressionList returns a copy of the suppression list
 func (s *State) GetSuppressionList() []string {
 	s.mu.RLock()

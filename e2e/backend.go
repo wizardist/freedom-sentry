@@ -21,6 +21,7 @@ type Backend interface {
 	// Assertions (with polling for eventual consistency)
 	AssertRevisionSuppressed(t *testing.T, revID int64, timeout time.Duration)
 	AssertRevisionNotSuppressed(t *testing.T, revID int64, timeout time.Duration)
+	AssertSuppressionBatchCount(t *testing.T, expectedCount int)
 
 	// State Management
 	UpdateSuppressionList(pages []string) error

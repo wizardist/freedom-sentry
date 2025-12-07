@@ -118,7 +118,7 @@ func TestBasicSuppression(t *testing.T) {
 			defer backend.Close()
 
 			// Start bot
-			bot := StartBot(t, backend)
+			bot := StartBot(t, backend, nil)
 			defer bot.Stop()
 
 			// Emit edit

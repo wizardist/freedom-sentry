@@ -40,7 +40,7 @@ func TestInitialFullScan(t *testing.T) {
 	defer backend.Close()
 
 	// Start bot (initial scan should run by default)
-	bot := StartBot(t, backend)
+	bot := StartBot(t, backend, nil)
 	defer bot.Stop()
 
 	// Verify both existing revisions are suppressed

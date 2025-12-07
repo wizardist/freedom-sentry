@@ -5,6 +5,7 @@ import (
 	"log/slog"
 	"os"
 	"strings"
+	"time"
 )
 
 const EnvAccessToken = "ACCESS_TOKEN"
@@ -13,6 +14,7 @@ const envSuppressionListName = "LIST_NAME"
 const EnvWikiDomain = "WIKI_DOMAIN"
 const EnvEventStreamsURL = "EVENTSTREAMS_URL"
 const EnvLogLevel = "LOG_LEVEL"
+const EnvBatchingSuppressorPeriod = "BATCHING_SUPPRESSOR_PERIOD"
 
 var isInitFullscanSkipped bool
 
@@ -56,4 +58,19 @@ func GetLogLevel() slog.Level {
 	default:
 		return slog.LevelInfo
 	}
+}
+
+func GetBatchingSuppressorPeriod() time.Duration {
+	period := os.Getenv(EnvBatchingSuppressorPeriod)
+	if period == "" {
+		return 5 * time.Second
+	}
+
+	duration, err := time.ParseDuration(period)
+	if err != nil {
+		slog.Warn("invalid batching suppressor period, using default", "error", err, "default", "5s")
+		return 5 * time.Second
+	}
+
+	return duration
 }

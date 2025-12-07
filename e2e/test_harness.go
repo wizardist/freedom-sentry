@@ -17,7 +17,7 @@ type BotProcess struct {
 }
 
 // StartBot builds and runs the bot binary as an external process
-func StartBot(t *testing.T, backend Backend) *BotProcess {
+func StartBot(t *testing.T, backend Backend, extraEnv map[string]string) *BotProcess {
 	t.Helper()
 
 	// Build binary in a temporary directory
@@ -39,7 +39,11 @@ func StartBot(t *testing.T, backend Backend) *BotProcess {
 		"LIST_NAME="+backend.ListPageName(),
 		"ACCESS_TOKEN=test-token",
 		"LOG_LEVEL=DEBUG",
+		"BATCHING_SUPPRESSOR_PERIOD=50ms",
 	)
+	for k, v := range extraEnv {
+		cmd.Env = append(cmd.Env, k+"="+v)
+	}
 
 	// Capture output for debugging
 	cmd.Stdout = os.Stdout

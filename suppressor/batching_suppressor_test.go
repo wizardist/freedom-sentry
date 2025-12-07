@@ -129,3 +129,26 @@ func Test_batchingSuppressor_SuppressRevisions(t *testing.T) {
 		})
 	}
 }
+
+func Test_batchingSuppressor_TimeBasedDrain(t *testing.T) {
+	t.Run("drains buffer after period", func(t *testing.T) {
+		standard := &mockSuppressor{}
+		batching := &batchingSuppressor{
+			period:     50 * time.Millisecond,
+			size:       5,
+			suppressor: standard,
+		}
+
+		revs := []mediawiki.Revision{{Id: "1"}}
+		if err := batching.SuppressRevisions(revs); err != nil {
+			t.Errorf("SuppressRevisions() must not throw error")
+			return
+		}
+
+		time.Sleep(55 * time.Millisecond)
+
+		if standard.callHistory != "1" {
+			t.Errorf("SuppressRevisions() call pattern [%s], expected [1]", standard.callHistory)
+		}
+	})
+}
