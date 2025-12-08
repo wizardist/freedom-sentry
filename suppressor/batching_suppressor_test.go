@@ -152,3 +152,80 @@ func Test_batchingSuppressor_TimeBasedDrain(t *testing.T) {
 		}
 	})
 }
+
+func Test_batchingSuppressor_ConfigurableBatchSize(t *testing.T) {
+	tests := []struct {
+		name           string
+		batchSize      int
+		revisions      [][]mediawiki.Revision
+		suppressValues string
+		forceDrain     int
+	}{
+		{
+			name:      "batch size 1 triggers immediately",
+			batchSize: 1,
+			revisions: [][]mediawiki.Revision{
+				{{Id: "1"}},
+				{{Id: "2"}},
+				{{Id: "3"}},
+			},
+			suppressValues: "1|2|3",
+		},
+		{
+			name:      "batch size 3 groups correctly",
+			batchSize: 3,
+			revisions: [][]mediawiki.Revision{
+				{{Id: "1"}, {Id: "2"}},
+				{{Id: "3"}, {Id: "4"}},
+			},
+			suppressValues: "1,2,3|4",
+			forceDrain:     1,
+		},
+		{
+			name:      "batch size 10 waits for more",
+			batchSize: 10,
+			revisions: [][]mediawiki.Revision{
+				{{Id: "1"}, {Id: "2"}, {Id: "3"}},
+				{{Id: "4"}, {Id: "5"}},
+			},
+			suppressValues: "1,2,3,4,5",
+			forceDrain:     1,
+		},
+		{
+			name:      "large batch size 100",
+			batchSize: 100,
+			revisions: [][]mediawiki.Revision{
+				{{Id: "1"}, {Id: "2"}, {Id: "3"}},
+			},
+			suppressValues: "1,2,3",
+			forceDrain:     1,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			standard := &mockSuppressor{}
+			batching := &batchingSuppressor{
+				size:       tt.batchSize,
+				suppressor: standard,
+			}
+
+			for _, revs := range tt.revisions {
+				if err := batching.SuppressRevisions(revs); err != nil {
+					t.Errorf("SuppressRevisions() must not throw error")
+					return
+				}
+			}
+
+			for i := 0; i < tt.forceDrain; i++ {
+				batching.forceDrainRequest <- true
+			}
+
+			time.Sleep(time.Millisecond)
+
+			if tt.suppressValues != standard.callHistory {
+				t.Errorf("SuppressRevisions() call pattern [%s], expected [%s]", standard.callHistory, tt.suppressValues)
+			}
+		})
+	}
+}

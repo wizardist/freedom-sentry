@@ -51,7 +51,12 @@ func (b *batchingSuppressor) drainBuffer() error {
 	if len(b.buffer) >= b.size {
 		batch, b.buffer = b.buffer[:b.size], b.buffer[b.size:]
 		slog.Debug("draining batch buffer", "batch_size", len(batch))
-		return b.suppressor.SuppressRevisions(batch)
+		err := b.suppressor.SuppressRevisions(batch)
+		slog.Info("batch drained",
+			"trigger", "size",
+			"batch_size", len(batch),
+			"buffer_remaining", len(b.buffer))
+		return err
 	}
 
 	return nil
@@ -75,7 +80,14 @@ func (b *batchingSuppressor) forceDrainBuffer() error {
 		"batch_size", len(batch),
 		"remaining", len(b.buffer))
 
-	return b.suppressor.SuppressRevisions(batch)
+	err := b.suppressor.SuppressRevisions(batch)
+	slog.Info("batch force drained",
+		"trigger", "period",
+		"batch_size", len(batch),
+		"buffer_remaining", len(b.buffer),
+		"period_sec", b.period.Seconds())
+
+	return err
 }
 
 func (b *batchingSuppressor) init() {

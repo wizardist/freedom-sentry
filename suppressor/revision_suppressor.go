@@ -49,7 +49,7 @@ func NewRevisionSuppressor(api mediawiki.Api) RevisionSuppressor {
 	return &filteringRevisionSuppressor{
 		suppressor: &batchingSuppressor{
 			period: config.GetBatchingSuppressorPeriod(),
-			size:   500,
+			size:   config.GetBatchingSuppressorSize(),
 			suppressor: &revisionSuppressorImpl{
 				api: api,
 			},

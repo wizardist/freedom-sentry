@@ -79,7 +79,7 @@ type cachingSuppressedPageRepoImpl struct {
 }
 
 func (c *cachingSuppressedPageRepoImpl) GetAll() ([]string, error) {
-	if !c.timestamp.IsZero() || time.Now().Sub(c.timestamp) < 24*time.Hour {
+	if !c.timestamp.IsZero() && time.Now().Sub(c.timestamp) < 24*time.Hour {
 		slog.Debug("using cached suppression list", "count", len(c.list))
 		return c.list, nil
 	}

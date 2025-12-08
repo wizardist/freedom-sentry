@@ -4,6 +4,7 @@ import (
 	"flag"
 	"log/slog"
 	"os"
+	"strconv"
 	"strings"
 	"time"
 )
@@ -15,6 +16,7 @@ const EnvWikiDomain = "WIKI_DOMAIN"
 const EnvEventStreamsURL = "EVENTSTREAMS_URL"
 const EnvLogLevel = "LOG_LEVEL"
 const EnvBatchingSuppressorPeriod = "BATCHING_SUPPRESSOR_PERIOD"
+const EnvBatchingSuppressorSize = "BATCHING_SUPPRESSOR_SIZE"
 
 var isInitFullscanSkipped bool
 
@@ -63,14 +65,34 @@ func GetLogLevel() slog.Level {
 func GetBatchingSuppressorPeriod() time.Duration {
 	period := os.Getenv(EnvBatchingSuppressorPeriod)
 	if period == "" {
-		return 5 * time.Second
+		return 1 * time.Second
 	}
 
 	duration, err := time.ParseDuration(period)
 	if err != nil {
-		slog.Warn("invalid batching suppressor period, using default", "error", err, "default", "5s")
-		return 5 * time.Second
+		slog.Warn("invalid batching suppressor period, using default", "error", err, "default", "1s")
+		return 1 * time.Second
 	}
 
 	return duration
+}
+
+func GetBatchingSuppressorSize() int {
+	sizeStr := os.Getenv(EnvBatchingSuppressorSize)
+	if sizeStr == "" {
+		return 50
+	}
+
+	size, err := strconv.Atoi(sizeStr)
+	if err != nil {
+		slog.Warn("invalid batching suppressor size, using default", "error", err, "default", 50)
+		return 50
+	}
+
+	if size < 1 {
+		slog.Warn("batching suppressor size too small, using minimum", "size", size, "minimum", 1)
+		return 1
+	}
+
+	return size
 }
