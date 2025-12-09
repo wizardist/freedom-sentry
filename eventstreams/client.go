@@ -13,6 +13,8 @@ import (
 	"time"
 )
 
+const userAgent = "FreedomSentry/1 (Stream-Client)"
+
 // Checkpoint represents the last processed event position in the Kafka stream
 type Checkpoint struct {
 	Topic     string `json:"topic"`
@@ -74,6 +76,7 @@ func (c *Client) Connect(ctx context.Context, since *time.Time) (*EventStream, e
 
 	req.Header.Set("Accept", "text/event-stream")
 	req.Header.Set("Cache-Control", "no-cache")
+	req.Header.Set("User-Agent", userAgent)
 
 	resp, err := c.httpClient.Do(req)
 	if err != nil {
@@ -149,10 +152,6 @@ func (c *Client) readEvents(ctx context.Context, body io.ReadCloser, stream *Eve
 					Data: json.RawMessage(data),
 				}
 
-				slog.Debug("EventStreams event received",
-					"event_id", eventID,
-					"data_size", len(data))
-
 				// Update checkpoint after receiving event (before sending to channel)
 				if eventID != "" {
 					c.updateCheckpoint(eventID)
@@ -203,8 +202,6 @@ func (c *Client) updateCheckpoint(eventID string) {
 	c.mu.Lock()
 	c.checkpoint = &checkpoints[0]
 	c.mu.Unlock()
-
-	slog.Debug("checkpoint updated", "topic", checkpoints[0].Topic, "partition", checkpoints[0].Partition, "offset", checkpoints[0].Offset)
 }
 
 // Events returns the read-only channel of incoming events
