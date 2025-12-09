@@ -19,6 +19,9 @@ config:
   # -- Name of the suppression list page (required)
   listName: ""
 
+  # -- Wiki domain (required)
+  wikiDomain: ""
+
   # -- Skip initial full scan on startup
   skipInitFullscan: false
 
